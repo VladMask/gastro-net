@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="01.create-users" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="./sql/01.create-users-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="02.create-roles" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/02.create-roles-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="03.create-user_roles" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/03.create-user_roles-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="04.dropped-password-column-in-users" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/04.dropped-password-column-in-users-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="05.altered-birth_date_column-in-users" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/05.altered-birth_date_column-in-users-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="06.insert-default-role-to-roles" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/06.insert-default-role-to-roles-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="07.drop-roles-and-related-tables" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/07.drop-roles-and-user_roles-tables.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="08.create-outbox_events" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/08.create-outbox_events-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="09.renamed-is_sent-column-to-status-in-outbox_events" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/09.renamed-is_sent-column-to-status-in-outbox_events-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="10.altered-type-of-status-column-in-outbox_events" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/10.altered-type-of-status-column-in-outbox_events-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="11.added-retry-column-to-outbox_events" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="/sql/11.added-retry-column-to-outbox_events-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="12.create-shedlock" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="/sql/12.create-shedlock-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+</databaseChangeLog>

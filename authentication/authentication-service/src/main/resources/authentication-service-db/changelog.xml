@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="01.create-profiles" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="./sql/01.create-profiles-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="2.added-index-on-user_id-in-profiles" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="./sql/2.added-index-on-user_id-in-profiles-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="03.create-roles" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/03.create-roles-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="04.insert-default-role-to-roles" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/04.insert-default-role-to-roles-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="05.create-profile_roles" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/05.create-profile_roles-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="06.drop-user_id-column-in-profiles" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="./sql/06.drop-user_id-column-in-profiles-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="07.add-email-column-to-profiles" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="./sql/07.add-email-column-to-profiles-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="08.create-refresh_tokens" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="./sql/08.create-refresh_tokens-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+</databaseChangeLog>
