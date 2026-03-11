@@ -1,5 +1,6 @@
 package grsu.by.service.impl;
 
+import grsu.by.config.properties.AuthenticationServiceProperties;
 import grsu.by.dto.RefreshTokensRequest;
 import grsu.by.entity.Profile;
 import grsu.by.entity.RefreshToken;
@@ -7,8 +8,6 @@ import grsu.by.repository.ProfileRepository;
 import grsu.by.repository.RefreshTokenRepository;
 import grsu.by.service.RefreshTokenService;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,12 +16,19 @@ import java.util.Date;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class RefreshTokenServiceImpl implements RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final ProfileRepository profileRepository;
-    @Value("${jwt.refresh-token.expiration-time}")
-    private Long REFRESH_TOKEN_EXPIRATION_TIME;
+    private final Long REFRESH_TOKEN_EXPIRATION_TIME;
+
+    public RefreshTokenServiceImpl(
+            RefreshTokenRepository refreshTokenRepository,
+            ProfileRepository profileRepository,
+            AuthenticationServiceProperties properties) {
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.profileRepository = profileRepository;
+        this.REFRESH_TOKEN_EXPIRATION_TIME = properties.getRefreshTokenService().getRefreshTokenExpirationTime();
+    }
 
     @Transactional
     @Override
