@@ -1,0 +1,5 @@
+﻿spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5436/gn-payment-service}
+    username: ${DB_USER:postgress}
+    password: ${DB_PASSWORD:postgress}

@@ -4,4 +4,3 @@ spring:
     url: ${AUTH_DB_URL:jdbc:postgresql://localhost:5439/gn-authentication-service}
     username: ${AUTH_DB_USERNAME:postgress}
     password: ${AUTH_DB_PASSWORD:postgress}
-    driver-class-name: org.postgresql.Driver

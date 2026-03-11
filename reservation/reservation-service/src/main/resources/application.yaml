@@ -1,0 +1,31 @@
+﻿server:
+  port: ${RESERVATION_SERVICE_PORT:8084}
+
+spring:
+  application:
+    name: reservation-service
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  liquibase:
+    change-log: classpath:reservation-service-db/changelog.xml
+
+exception:
+  dto-factory:
+    service-id: reservation-service
+
+logging:
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+management:
+  tracing:
+    sampling:
+      probability: 1

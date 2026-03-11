@@ -1,0 +1,19 @@
+﻿server:
+  port: ${INVOICE_SERVICE_PORT:8089}
+
+spring:
+  application:
+    name: invoice-service
+
+exception:
+  dto-factory:
+    service-id: invoice-service
+
+logging:
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+management:
+  tracing:
+    sampling:
+      probability: 1
