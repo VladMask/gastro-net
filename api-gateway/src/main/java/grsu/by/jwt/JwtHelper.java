@@ -1,4 +1,4 @@
-package grsu.by.security.jwt;
+package grsu.by.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
