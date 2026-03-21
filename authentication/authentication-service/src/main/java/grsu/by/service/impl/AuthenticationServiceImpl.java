@@ -2,14 +2,13 @@ package grsu.by.service.impl;
 
 import grsu.by.dto.AuthenticationResponse;
 import grsu.by.dto.AuthenticationRequest;
-import grsu.by.dto.RefreshTokensRequest;
 import grsu.by.entity.Profile;
 import grsu.by.entity.RefreshToken;
 import grsu.by.entity.Role;
 import grsu.by.jwt.JwtGenerator;
 import grsu.by.repository.ProfileRepository;
 import grsu.by.repository.RoleRepository;
-import grsu.by.service.ProfileService;
+import grsu.by.service.AuthenticationService;
 import grsu.by.service.RefreshTokenService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ProfileServiceImpl implements ProfileService {
+public class AuthenticationServiceImpl implements AuthenticationService {
     private final ProfileRepository profileRepository;
     private final RoleRepository roleRepository;
     private final ModelMapper mapper;
@@ -64,7 +63,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Transactional
     @Override
-    public AuthenticationResponse refreshTokens(RefreshTokensRequest refreshToken) {
+    public AuthenticationResponse refreshTokens(String refreshToken) {
         RefreshToken refreshedToken = refreshTokenService.refreshToken(refreshToken);
         Profile profile = profileRepository.findById(refreshedToken.getProfileId()).orElseThrow(
                 () -> new EntityNotFoundException("Profile not found")
@@ -77,8 +76,8 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public void logout(RefreshTokensRequest refreshTokenRequest) {
-        refreshTokenService.deleteByToken(refreshTokenRequest);
+    public void logout(String refreshToken) {
+        refreshTokenService.deleteByToken(refreshToken);
     }
 
     private AuthenticationResponse getTokenPair(String email) {

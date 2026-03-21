@@ -17,7 +17,7 @@ public class ApiGatewaySecurityConfig {
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .authorizeExchange(ex -> ex
-                        .pathMatchers("/api/v1/auth/**").permitAll()
+                        .pathMatchers("/api/v1/authentication/**").permitAll()
                         .anyExchange().permitAll()
                 )
                 .build();

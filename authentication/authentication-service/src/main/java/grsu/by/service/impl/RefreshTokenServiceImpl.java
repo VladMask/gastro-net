@@ -1,7 +1,6 @@
 package grsu.by.service.impl;
 
 import grsu.by.config.properties.AuthenticationServiceProperties;
-import grsu.by.dto.RefreshTokensRequest;
 import grsu.by.entity.Profile;
 import grsu.by.entity.RefreshToken;
 import grsu.by.repository.ProfileRepository;
@@ -47,8 +46,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Transactional
     @Override
-    public RefreshToken refreshToken(RefreshTokensRequest refreshTokenRequest) {
-        RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenRequest.getRefreshToken()).orElseThrow(
+    public RefreshToken refreshToken(String tokenToRefresh) {
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(tokenToRefresh).orElseThrow(
                 () -> new EntityNotFoundException("Token not found")
         );
         if (refreshToken.getExpirationDate().isBefore(Instant.now())) {
@@ -64,8 +63,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Transactional
     @Override
-    public void deleteByToken(RefreshTokensRequest refreshTokenRequest) {
-        refreshTokenRepository.deleteByToken(refreshTokenRequest.getRefreshToken());
+    public void deleteByToken(String refreshToken) {
+        refreshTokenRepository.deleteByToken(refreshToken);
     }
 
     @Transactional

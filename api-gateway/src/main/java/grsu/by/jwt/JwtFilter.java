@@ -4,8 +4,8 @@ import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
-import org.springframework.core.Ordered;
-import org.springframework.http.HttpHeaders;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,8 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
-public class JwtFilter implements GlobalFilter, Ordered {
+@Order(-1)
+public class JwtFilter implements GlobalFilter{
 
     private final JwtHelper jwtHelper;
 
@@ -22,20 +23,19 @@ public class JwtFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getPath().value();
 
-        if (path.startsWith("/api/v1/auth/")) {
+        if (path.startsWith("/api/v1/authentication/")) {
             return chain.filter(exchange);
         }
 
-        String authHeader = exchange.getRequest()
-                .getHeaders()
-                .getFirst(HttpHeaders.AUTHORIZATION);
+        HttpCookie cookie = exchange.getRequest().getCookies().getFirst("access_token");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (cookie == null) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
 
-        String token = authHeader.substring(7);
+        String token = cookie.getValue();
+
         if (!jwtHelper.validateToken(token)) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
@@ -49,10 +49,5 @@ public class JwtFilter implements GlobalFilter, Ordered {
                 .build();
 
         return chain.filter(exchange.mutate().request(mutated).build());
-    }
-
-    @Override
-    public int getOrder() {
-        return -1;
     }
 }

@@ -3,7 +3,6 @@ package grsu.by;
 import grsu.by.config.properties.AuthenticationRestClientProperties;
 import grsu.by.dto.AuthenticationResponse;
 import grsu.by.dto.AuthenticationRequest;
-import grsu.by.dto.RefreshTokensRequest;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpHeaders;
@@ -42,20 +41,20 @@ public class AuthenticationRestClient {
                 .body(AuthenticationResponse.class);
     }
 
-    public AuthenticationResponse refreshTokens(RefreshTokensRequest refreshTokensRequest) {
+    public AuthenticationResponse refreshTokens(String refreshToken) {
         return  restClient
                 .post()
                 .uri("/api/v1/profiles/refresh")
-                .body(refreshTokensRequest)
+                .body(refreshToken)
                 .retrieve()
                 .body(AuthenticationResponse.class);
     }
 
-    public String logout(RefreshTokensRequest refreshTokensRequest) {
+    public String logout(String refreshToken) {
         return restClient
                 .post()
                 .uri("/api/v1/profiles/logout")
-                .body(refreshTokensRequest)
+                .body(refreshToken)
                 .retrieve()
                 .body(String.class);
     }
