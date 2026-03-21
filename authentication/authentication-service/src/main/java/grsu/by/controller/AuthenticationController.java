@@ -2,6 +2,7 @@ package grsu.by.controller;
 
 import grsu.by.dto.AuthenticationRequest;
 import grsu.by.dto.AuthenticationResponse;
+import grsu.by.dto.RegistrationRequest;
 import grsu.by.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -39,7 +40,7 @@ public class AuthenticationController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.OK)
     public void register(
-            @RequestBody @Valid AuthenticationRequest request,
+            @RequestBody @Valid RegistrationRequest request,
             HttpServletResponse response
     ) {
         AuthenticationResponse tokens = authService.register(request);

@@ -43,3 +43,8 @@ authentication:
     access-token-expiration-time: ${JWT_ACCESS_TOKEN_EXPIRATION:600000}
   refresh-token-service:
     refresh-token-expiration-time: ${JWT_REFRESH_TOKEN_EXPIRATION:86400000}
+
+rest:
+  client:
+    user-service:
+      base-url: http://localhost:8081

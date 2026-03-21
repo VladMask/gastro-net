@@ -3,6 +3,7 @@ package grsu.by;
 import grsu.by.config.properties.AuthenticationRestClientProperties;
 import grsu.by.dto.AuthenticationResponse;
 import grsu.by.dto.AuthenticationRequest;
+import grsu.by.dto.RegistrationRequest;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpHeaders;
@@ -26,16 +27,16 @@ public class AuthenticationRestClient {
     public AuthenticationResponse login(AuthenticationRequest request) {
         return restClient
                 .post()
-                .uri("/api/v1/profiles/login")
+                .uri("/api/v1/authentication/login")
                 .body(request)
                 .retrieve()
                 .body(AuthenticationResponse.class);
     }
 
-    public AuthenticationResponse register(AuthenticationRequest request) {
+    public AuthenticationResponse register(RegistrationRequest request) {
         return restClient
                 .post()
-                .uri("/api/v1/profiles/register")
+                .uri("/api/v1/authentication/register")
                 .body(request)
                 .retrieve()
                 .body(AuthenticationResponse.class);
@@ -44,7 +45,7 @@ public class AuthenticationRestClient {
     public AuthenticationResponse refreshTokens(String refreshToken) {
         return  restClient
                 .post()
-                .uri("/api/v1/profiles/refresh")
+                .uri("/api/v1/authentication/refresh")
                 .body(refreshToken)
                 .retrieve()
                 .body(AuthenticationResponse.class);
@@ -53,7 +54,7 @@ public class AuthenticationRestClient {
     public String logout(String refreshToken) {
         return restClient
                 .post()
-                .uri("/api/v1/profiles/logout")
+                .uri("/api/v1/authentication/logout")
                 .body(refreshToken)
                 .retrieve()
                 .body(String.class);

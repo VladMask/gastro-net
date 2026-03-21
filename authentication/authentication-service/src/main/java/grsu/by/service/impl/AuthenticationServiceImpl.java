@@ -1,7 +1,10 @@
 package grsu.by.service.impl;
 
+import grsu.by.UserRestClient;
 import grsu.by.dto.AuthenticationResponse;
 import grsu.by.dto.AuthenticationRequest;
+import grsu.by.dto.RegistrationRequest;
+import grsu.by.dto.UserCreationDto;
 import grsu.by.entity.Profile;
 import grsu.by.entity.RefreshToken;
 import grsu.by.entity.Role;
@@ -13,7 +16,6 @@ import grsu.by.service.RefreshTokenService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,10 +28,10 @@ import java.util.List;
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final ProfileRepository profileRepository;
     private final RoleRepository roleRepository;
-    private final ModelMapper mapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtGenerator jwtGenerator;
     private final RefreshTokenService refreshTokenService;
+    private final UserRestClient userRestClient;
     private final String DEFAULT_ROLE_NAME = "USER";
 
     @Transactional
@@ -49,16 +51,35 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Transactional
     @Override
-    public AuthenticationResponse register(AuthenticationRequest request) {
-        Profile profile = mapper.map(request, Profile.class);
-        profile.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        Role role = roleRepository.findByName(DEFAULT_ROLE_NAME).orElseThrow(
-                () -> new EntityNotFoundException("Role not found")
-        );
-        profile.setRoles(List.of(role));
-        profileRepository.save(profile);
+    public AuthenticationResponse register(RegistrationRequest request) {
+
+        try {
+            UserCreationDto userDto = UserCreationDto.builder()
+                    .firstname(request.getFirstname())
+                    .lastname(request.getLastname())
+                    .email(request.getEmail())
+                    .birthDate(request.getBirthDate())
+                    .build();
+
+            userRestClient.create(userDto);
+
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to create user profile", ex);
+        }
+        Profile profile = createProfile(request);
 
         return getTokenPair(profile.getEmail());
+    }
+
+    private Profile createProfile(RegistrationRequest request) {
+        Profile profile = Profile.builder()
+                .email(request.getEmail())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .build();
+        Role role = roleRepository.findByName("USER")
+                .orElseThrow(() -> new EntityNotFoundException("Role not found"));
+        profile.setRoles(List.of(role));
+        return profileRepository.save(profile);
     }
 
     @Transactional
@@ -69,6 +90,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 () -> new EntityNotFoundException("Profile not found")
         );
         String accessToken = jwtGenerator.generate(profile.getEmail());
+
+        refreshTokenService.deleteByToken(refreshToken);
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshedToken.getToken())

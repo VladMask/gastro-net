@@ -16,13 +16,15 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserCreationDto {
+public class RegistrationRequest {
     @NotBlank
     private String firstname;
     @NotBlank
     private String lastname;
     @Email
     private String email;
+    @NotBlank
+    private String password;
     @Past
     private LocalDate birthDate;
 }
