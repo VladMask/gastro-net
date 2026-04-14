@@ -18,6 +18,7 @@ public class UserShortDto {
     private String firstname;
     private String lastname;
     private String email;
+    private String phoneNumber;
     private LocalDate birthDate;
     private Instant createdAt;
     private Instant updatedAt;

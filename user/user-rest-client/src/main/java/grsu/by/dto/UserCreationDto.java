@@ -23,6 +23,7 @@ public class UserCreationDto {
     private String lastname;
     @Email
     private String email;
+    private String phoneNumber;
     @Past
     private LocalDate birthDate;
 }

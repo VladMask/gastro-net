@@ -6,7 +6,7 @@ create table mails (
     subject varchar not null,
     body varchar not null,
     status varchar not null,
-    created_at timestamp with time zone not null
+    created_at timestamp not null
 );
 
 -- rollback drop table mails;

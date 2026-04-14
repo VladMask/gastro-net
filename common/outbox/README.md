@@ -54,7 +54,7 @@ create table outbox_events (
     payload varchar not null,
     status varchar not null,
     retry smallint not null default 0,
-    created_at timestamp with time zone
+    created_at timestamp
 );
 ```
 This table will store pending and processed outbox events that are later published to Kafka.

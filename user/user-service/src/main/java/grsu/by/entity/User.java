@@ -35,6 +35,8 @@ public class User {
     private String lastname;
     @Column(name = "email")
     private String email;
+    @Column(name = "phone_number")
+    private String phoneNumber;
     @Column(name = "birth_date")
     private LocalDate birthDate;
     @Column(name = "created_at")

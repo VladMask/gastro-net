@@ -17,8 +17,4 @@
         <sqlFile encoding="utf8" path="sql/03.create-shedlock-table.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
-    <changeSet id="04.create-banking_payments" author="Vladislav Maskevich">
-        <sqlFile encoding="utf8" path="sql/04.create-banking_payments-table.sql" relativeToChangelogFile="true"/>
-    </changeSet>
-
 </databaseChangeLog>

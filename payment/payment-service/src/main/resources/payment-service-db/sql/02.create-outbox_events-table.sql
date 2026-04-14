@@ -6,7 +6,7 @@ create table outbox_events (
     payload varchar not null,
     status varchar not null,
     retry smallint not null default 0,
-    created_at timestamp with time zone
+    created_at timestamp
 );
 
 -- rollback drop table outbox_events;

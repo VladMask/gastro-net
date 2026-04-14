@@ -1,11 +1,12 @@
---liquibase formatted sql
+-- liquibase formatted sql
 
 create table outbox_events (
     id bigserial primary key,
     header varchar not null,
     payload varchar not null,
-    is_sent bool not null default false,
-    created_at timestamp with time zone
+    status varchar not null,
+    retry smallint not null default 0,
+    created_at timestamp
 );
 
 -- rollback drop table outbox_events;
