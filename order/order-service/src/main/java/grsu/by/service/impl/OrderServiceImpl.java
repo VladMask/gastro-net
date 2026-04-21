@@ -31,10 +31,12 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public OrderShortDto create(OrderCreationDto creationDto) {
-        try {
-            reservationRestClient.findReservationById(creationDto.getReservationId());
-        } catch (HttpClientErrorException e) {
-            throw new EntityNotFoundException("No active reservation was found");
+        if (creationDto.getReservationId() != null) {
+            try {
+                reservationRestClient.findReservationById(creationDto.getReservationId());
+            } catch (HttpClientErrorException e) {
+                throw new EntityNotFoundException("No active reservation was found");
+            }
         }
 
         Order order = mapper.map(creationDto, Order.class);
@@ -49,6 +51,7 @@ public class OrderServiceImpl implements OrderService {
         orderMeals.forEach(orderMeal -> orderMeal.setOrderId(orderId));
         orderMealRepository.saveAll(orderMeals);
 
+        order.setId(orderId);
         return mapper.map(order, OrderShortDto.class);
     }
 
@@ -57,7 +60,6 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findWithDetailsById(id).orElseThrow(
                 () -> new EntityNotFoundException("Order not found")
         );
-        order.setTotalPrice(computeTotalPrice(order.getOrderMeals()));
         return mapper.map(order, OrderShortDto.class);
     }
 
@@ -66,8 +68,24 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findWithDetailsById(id).orElseThrow(
                 () -> new EntityNotFoundException("Order not found")
         );
-        order.setTotalPrice(computeTotalPrice(order.getOrderMeals()));
         return mapper.map(order, OrderFullDto.class);
+    }
+
+    @Override
+    public List<OrderShortDto> findByUserId(Long userId) {
+        return orderRepository.findByUserId(userId).stream()
+                .map(order -> mapper.map(order, OrderShortDto.class))
+                .toList();
+    }
+
+    @Transactional
+    @Override
+    public OrderShortDto updateStatus(Long id, OrderStatus status) {
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Order not found")
+        );
+        order.setStatus(status);
+        return mapper.map(orderRepository.save(order), OrderShortDto.class);
     }
 
     private BigDecimal computeTotalPrice(List<OrderMeal> meals) {

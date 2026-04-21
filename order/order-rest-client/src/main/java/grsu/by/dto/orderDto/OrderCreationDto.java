@@ -19,7 +19,7 @@ import java.util.List;
 public class OrderCreationDto {
     @Positive
     private Long restaurantId;
-    @Positive
+    private Long userId;
     private Long reservationId;
     @NotEmpty
     private List<OrderMealCreationDto> orderMeals;

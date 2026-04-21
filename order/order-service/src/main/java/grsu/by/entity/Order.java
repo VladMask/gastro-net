@@ -12,7 +12,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,9 +37,11 @@ public class Order {
     private Long id;
     @Column(name = "restaurant_id")
     private Long restaurantId;
+    @Column(name = "user_id")
+    private Long userId;
     @Column(name = "reservation_id")
     private Long reservationId;
-    @Transient
+    @Column(name = "total_price", precision = 10, scale = 2)
     private BigDecimal totalPrice;
     @CreationTimestamp
     @Column(name = "created_at")

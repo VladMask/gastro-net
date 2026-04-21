@@ -15,7 +15,9 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 public class OrderShortDto {
+    private Long id;
     private Long restaurantId;
+    private Long userId;
     private Long reservationId;
     private Instant createdAt;
     private String status;
