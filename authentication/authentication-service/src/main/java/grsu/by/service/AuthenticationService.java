@@ -9,4 +9,5 @@ public interface AuthenticationService {
     AuthenticationResponse register(RegistrationRequest request);
     AuthenticationResponse refreshTokens(String refreshToken);
     void logout(String refreshToken);
+    void assignRole(Long profileId, String roleName);
 }

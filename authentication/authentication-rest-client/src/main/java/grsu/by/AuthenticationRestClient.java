@@ -1,9 +1,6 @@
 package grsu.by;
 
 import grsu.by.config.properties.AuthenticationRestClientProperties;
-import grsu.by.dto.AuthenticationResponse;
-import grsu.by.dto.AuthenticationRequest;
-import grsu.by.dto.RegistrationRequest;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpHeaders;
@@ -24,39 +21,14 @@ public class AuthenticationRestClient {
                 .build();
     }
 
-    public AuthenticationResponse login(AuthenticationRequest request) {
-        return restClient
+    public void assignRole(Long profileId, String roleName) {
+        restClient
                 .post()
-                .uri("/api/v1/authentication/login")
-                .body(request)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/v1/authentication/internal/profiles/{profileId}/roles")
+                        .queryParam("roleName", roleName)
+                        .build(profileId))
                 .retrieve()
-                .body(AuthenticationResponse.class);
-    }
-
-    public AuthenticationResponse register(RegistrationRequest request) {
-        return restClient
-                .post()
-                .uri("/api/v1/authentication/register")
-                .body(request)
-                .retrieve()
-                .body(AuthenticationResponse.class);
-    }
-
-    public AuthenticationResponse refreshTokens(String refreshToken) {
-        return  restClient
-                .post()
-                .uri("/api/v1/authentication/refresh")
-                .body(refreshToken)
-                .retrieve()
-                .body(AuthenticationResponse.class);
-    }
-
-    public String logout(String refreshToken) {
-        return restClient
-                .post()
-                .uri("/api/v1/authentication/logout")
-                .body(refreshToken)
-                .retrieve()
-                .body(String.class);
+                .toBodilessEntity();
     }
 }

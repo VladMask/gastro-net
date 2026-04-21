@@ -12,10 +12,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 @Order(-1)
-public class JwtFilter implements GlobalFilter{
+public class JwtFilter implements GlobalFilter {
 
     private final JwtHelper jwtHelper;
 
@@ -44,8 +46,19 @@ public class JwtFilter implements GlobalFilter{
         Claims claims = jwtHelper.extractAllClaims(token);
         String login = claims.getSubject();
 
+        Long profileId = claims.get("profileId", Long.class);
+        List<?> rawRoles = claims.get("roles", List.class);
+        String roles = rawRoles != null ? String.join(",", rawRoles.stream().map(Object::toString).toList()) : "";
+
         ServerHttpRequest mutated = exchange.getRequest().mutate()
+                .headers(h -> {
+                    h.remove("X-Auth-Login");
+                    h.remove("X-Auth-Profile-Id");
+                    h.remove("X-Auth-Roles");
+                })
                 .header("X-Auth-Login", login)
+                .header("X-Auth-Profile-Id", profileId != null ? profileId.toString() : "")
+                .header("X-Auth-Roles", roles)
                 .build();
 
         return chain.filter(exchange.mutate().request(mutated).build());

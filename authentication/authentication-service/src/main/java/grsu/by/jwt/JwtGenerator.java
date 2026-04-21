@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtGenerator {
@@ -19,9 +20,11 @@ public class JwtGenerator {
         this.ACCESS_TOKEN_EXPIRATION_TIME = properties.getJwtGenerator().getAccessTokenExpirationTime();
     }
 
-    public String generate(String email) {
+    public String generate(String email, Long profileId, List<String> roles) {
         return Jwts.builder()
                 .subject(email)
+                .claim("profileId", profileId)
+                .claim("roles", roles)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TIME))
                 .signWith(getSigningKey())

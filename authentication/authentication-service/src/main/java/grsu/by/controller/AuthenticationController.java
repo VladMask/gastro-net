@@ -10,10 +10,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -66,6 +69,13 @@ public class AuthenticationController {
         clearTokenCookies(response);
     }
 
+    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
+    @PostMapping("/internal/profiles/{profileId}/roles")
+    @ResponseStatus(HttpStatus.OK)
+    public void assignRole(@PathVariable Long profileId, @RequestParam String roleName) {
+        authService.assignRole(profileId, roleName);
+    }
+
     private void addTokenCookies(HttpServletResponse response, AuthenticationResponse tokens) {
         ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
                 .httpOnly(true)
@@ -79,7 +89,7 @@ public class AuthenticationController {
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Strict")
-                .path("/api/v1/authentication/refresh")
+                .path("/")
                 .maxAge(Duration.ofDays(7))
                 .build();
 
@@ -96,7 +106,7 @@ public class AuthenticationController {
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)
-                .path("/api/v1/authentication/refresh")
+                .path("/")
                 .maxAge(0)
                 .build();
 
