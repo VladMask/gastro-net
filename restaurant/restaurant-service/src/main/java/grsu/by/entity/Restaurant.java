@@ -33,8 +33,12 @@ public class Restaurant {
     private String description;
     @Column(name = "rating")
     private BigDecimal rating;
-    @Column(name = "photos_url")
-    private String photosUrl;
+    @Column(name = "preview_photo_url")
+    private String previewPhotoUrl;
+    @Column(name = "contact_phone")
+    private String contactPhone;
+    @Column(name = "working_hours")
+    private String workingHours;
     @Embedded
     private Address address;
 }

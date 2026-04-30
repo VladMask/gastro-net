@@ -13,8 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
@@ -34,6 +33,6 @@ public class MealCategory {
     private Boolean isVegan;
 
     @OneToMany(mappedBy = "category")
-    private Set<Meal> meals = new LinkedHashSet<>();
+    private List<Meal> meals;
 
 }
