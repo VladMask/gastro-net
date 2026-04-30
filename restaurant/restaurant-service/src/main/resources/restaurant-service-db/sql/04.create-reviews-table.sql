@@ -3,7 +3,7 @@
 create table reviews (
     id bigserial primary key,
     restaurant_id bigint not null,
-    user_id bigint not null,
+    user_email varchar not null,
     rating smallint not null check (rating between 1 and 5),
     content text,
     created_at timestamp not null

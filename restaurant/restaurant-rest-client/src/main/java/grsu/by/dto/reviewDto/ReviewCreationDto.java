@@ -17,8 +17,7 @@ import lombok.Setter;
 public class ReviewCreationDto {
     @NotNull
     private Long restaurantId;
-    @NotNull
-    private Long userId;
+    private String userEmail;
     @NotNull
     @Min(1)
     @Max(5)

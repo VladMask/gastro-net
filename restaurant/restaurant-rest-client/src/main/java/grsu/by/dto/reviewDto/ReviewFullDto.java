@@ -14,9 +14,8 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewFullDto {
-    private Long id;
     private Long restaurantId;
-    private Long userId;
+    private String userEmail;
     private Short rating;
     private String content;
     private Instant createdAt;

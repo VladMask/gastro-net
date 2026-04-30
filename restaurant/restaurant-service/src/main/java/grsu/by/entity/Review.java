@@ -30,8 +30,8 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(name = "user_email")
+    private String userEmail;
     @Column(name = "rating")
     private Short rating;
     @Column(name = "content", columnDefinition = "text")
