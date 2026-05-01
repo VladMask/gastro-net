@@ -6,14 +6,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserShortDto {
+public class UserFullDto {
     private long id;
     private String firstname;
     private String lastname;
     private String email;
+    private String phoneNumber;
+    private LocalDate birthDate;
+    private Instant createdAt;
+    private Instant updatedAt;
 }

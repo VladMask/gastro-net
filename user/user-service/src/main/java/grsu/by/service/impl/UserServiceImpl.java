@@ -3,6 +3,7 @@ package grsu.by.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import grsu.by.dto.EmailResponse;
 import grsu.by.dto.UserCreationDto;
+import grsu.by.dto.UserFullDto;
 import grsu.by.dto.UserShortDto;
 import grsu.by.entity.OutboxEvent;
 import grsu.by.entity.User;
@@ -58,6 +59,14 @@ public class UserServiceImpl implements UserService {
                 () -> new EntityNotFoundException("User not found")
         );
         return new EmailResponse(email);
+    }
+
+    @Override
+    public UserFullDto findByEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new EntityNotFoundException("User not found")
+        );
+        return mapper.map(user, UserFullDto.class);
     }
 
 }
