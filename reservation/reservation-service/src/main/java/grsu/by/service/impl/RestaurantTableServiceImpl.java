@@ -12,9 +12,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class RestaurantTableServiceImpl implements RestaurantTableService {
+
     private final RestaurantTableRepository restaurantTableRepository;
     private final ModelMapper mapper;
 
@@ -28,10 +31,31 @@ public class RestaurantTableServiceImpl implements RestaurantTableService {
 
     @Override
     public RestaurantTableFullDto findById(Long id) {
-        RestaurantTable table = restaurantTableRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Restaurant table with id " + id + " not found")
-        );
+        RestaurantTable table = restaurantTableRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant table with id " + id + " not found"));
         return mapper.map(table, RestaurantTableFullDto.class);
     }
 
+    @Override
+    public List<RestaurantTableFullDto> findByRestaurantId(Long restaurantId) {
+        return restaurantTableRepository.findByRestaurantId(restaurantId).stream()
+                .map(t -> mapper.map(t, RestaurantTableFullDto.class))
+                .toList();
+    }
+
+    @Override
+    public List<RestaurantTableFullDto> findByRestaurantIdAndStatus(Long restaurantId, RestaurantTableStatus status) {
+        return restaurantTableRepository.findByRestaurantIdAndStatus(restaurantId, status).stream()
+                .map(t -> mapper.map(t, RestaurantTableFullDto.class))
+                .toList();
+    }
+
+    @Transactional
+    @Override
+    public RestaurantTableFullDto updateStatus(Long id, RestaurantTableStatus status) {
+        RestaurantTable table = restaurantTableRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant table with id " + id + " not found"));
+        table.setStatus(status);
+        return mapper.map(restaurantTableRepository.save(table), RestaurantTableFullDto.class);
+    }
 }

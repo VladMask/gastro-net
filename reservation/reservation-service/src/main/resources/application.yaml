@@ -29,3 +29,8 @@ management:
   tracing:
     sampling:
       probability: 1
+
+reservation:
+  scheduler:
+    expiration-check-delay: 300000
+    expiration-initial-delay: 60000

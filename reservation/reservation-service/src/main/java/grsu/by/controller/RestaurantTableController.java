@@ -2,30 +2,36 @@ package grsu.by.controller;
 
 import grsu.by.dto.restaurantTableDto.RestaurantTableCreationDto;
 import grsu.by.dto.restaurantTableDto.RestaurantTableFullDto;
+import grsu.by.enums.RestaurantTableStatus;
 import grsu.by.service.RestaurantTableService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/restaurants/tables")
 @Slf4j
 public class RestaurantTableController {
+
     private final RestaurantTableService service;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public RestaurantTableFullDto create(@RequestBody @Valid RestaurantTableCreationDto creationDto) {
-        log.info("Create request received");
+        log.info("Create RestaurantTable request received");
         return service.create(creationDto);
     }
 
@@ -34,5 +40,26 @@ public class RestaurantTableController {
     public RestaurantTableFullDto findById(@PathVariable Long id) {
         log.info("Find RestaurantTable by id {}", id);
         return service.findById(id);
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<RestaurantTableFullDto> findByRestaurantId(
+            @RequestParam Long restaurantId,
+            @RequestParam(required = false) RestaurantTableStatus status
+    ) {
+        if (status != null) {
+            return service.findByRestaurantIdAndStatus(restaurantId, status);
+        }
+        return service.findByRestaurantId(restaurantId);
+    }
+
+    @PatchMapping("/{id}/status")
+    @ResponseStatus(HttpStatus.OK)
+    public RestaurantTableFullDto updateStatus(
+            @PathVariable Long id,
+            @RequestParam RestaurantTableStatus status
+    ) {
+        return service.updateStatus(id, status);
     }
 }
