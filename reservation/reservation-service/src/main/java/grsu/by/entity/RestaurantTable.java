@@ -28,16 +28,44 @@ public class RestaurantTable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
     @Column(name = "restaurant_id")
     private Long restaurantId;
+
     @Column(name = "number")
     private String number;
+
     @Column(name = "capacity")
     @ColumnDefault("1")
     private Short capacity;
+
     @Column(name = "location")
     private String location;
+
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private RestaurantTableStatus status;
+
+    @Column(name = "pos_x")
+    @ColumnDefault("0")
+    private Double posX;
+
+    @Column(name = "pos_y")
+    @ColumnDefault("0")
+    private Double posY;
+
+    @Column(name = "width")
+    @ColumnDefault("10")
+    private Double width;
+
+    @Column(name = "height")
+    @ColumnDefault("10")
+    private Double height;
+
+    @Column(name = "shape")
+    @ColumnDefault("'rect'")
+    private String shape;
+
+    @Column(name = "label")
+    private String label;
 }

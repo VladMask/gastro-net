@@ -17,4 +17,8 @@
         <sqlFile encoding="utf8" path="sql/03.create-reservation_tables-table.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
+    <changeSet id="04.add-table-schema-fields" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/04.add-table-schema-fields.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
 </databaseChangeLog>

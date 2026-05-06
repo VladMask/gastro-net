@@ -12,9 +12,18 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RestaurantTableFullDto {
+    private Long id;
     private Long restaurantId;
     private String number;
     private Short capacity;
     private String location;
     private String status;
+
+    // Поля схемы зала
+    private Double posX;
+    private Double posY;
+    private Double width;
+    private Double height;
+    private String shape;
+    private String label;
 }

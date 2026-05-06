@@ -22,4 +22,12 @@ public class RestaurantTableCreationDto {
     private Short capacity;
     @NotBlank
     private String location;
+
+    // Поля схемы зала (опциональные)
+    private Double posX;
+    private Double posY;
+    private Double width;
+    private Double height;
+    private String shape;  // "rect" | "circle"
+    private String label;
 }
