@@ -29,7 +29,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/meals")
 @RequiredArgsConstructor
-public class MealsController {
+public class MealController {
     private final MealService service;
     private final ObjectMapper objectMapper;
 
