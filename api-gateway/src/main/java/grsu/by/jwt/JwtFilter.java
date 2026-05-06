@@ -25,7 +25,7 @@ public class JwtFilter implements GlobalFilter {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getPath().value();
 
-        if (path.startsWith("/api/v1/authentication/")) {
+        if (path.startsWith("/api/v1/authentication/") && !"/api/v1/authentication/me/roles".equals(path)) {
             return chain.filter(exchange);
         }
 

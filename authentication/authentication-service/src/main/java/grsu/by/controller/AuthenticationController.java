@@ -3,6 +3,7 @@ package grsu.by.controller;
 import grsu.by.dto.AuthenticationRequest;
 import grsu.by.dto.AuthenticationResponse;
 import grsu.by.dto.RegistrationRequest;
+import grsu.by.dto.RolesResponseDto;
 import grsu.by.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -12,9 +13,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -74,6 +77,12 @@ public class AuthenticationController {
     @ResponseStatus(HttpStatus.OK)
     public void assignRole(@PathVariable Long profileId, @RequestParam String roleName) {
         authService.assignRole(profileId, roleName);
+    }
+
+    @GetMapping("/me/roles")
+    @ResponseStatus(HttpStatus.OK)
+    public RolesResponseDto getMyRoles(@RequestHeader("X-Auth-Login") String email) {
+        return authService.getMyRoles(email);
     }
 
     private void addTokenCookies(HttpServletResponse response, AuthenticationResponse tokens) {

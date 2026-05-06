@@ -1,9 +1,10 @@
 package grsu.by.service.impl;
 
 import grsu.by.UserRestClient;
-import grsu.by.dto.AuthenticationResponse;
 import grsu.by.dto.AuthenticationRequest;
+import grsu.by.dto.AuthenticationResponse;
 import grsu.by.dto.RegistrationRequest;
+import grsu.by.dto.RolesResponseDto;
 import grsu.by.dto.UserCreationDto;
 import grsu.by.entity.Profile;
 import grsu.by.entity.RefreshToken;
@@ -106,6 +107,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             profile.getRoles().add(role);
             profileRepository.save(profile);
         }
+    }
+
+    @Override
+    public RolesResponseDto getMyRoles(String email) {
+        Profile profile = profileRepository.findByEmailWithRoles(email)
+                .orElseThrow(() -> new EntityNotFoundException("Profile not found"));
+
+        List<String> roles = profile.getRoles().stream()
+                .map(Role::getName)
+                .toList();
+
+        return new RolesResponseDto(roles);
     }
 
     private Profile createProfile(RegistrationRequest request) {
