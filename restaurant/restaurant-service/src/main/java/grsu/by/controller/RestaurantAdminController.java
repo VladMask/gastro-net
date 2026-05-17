@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,5 +36,13 @@ public class RestaurantAdminController {
     public void removeAdmin(@PathVariable Long restaurantId, @RequestParam Long profileId) {
         log.info("Remove profile {} from admins of restaurant {}", profileId, restaurantId);
         service.removeAdmin(restaurantId, profileId);
+    }
+
+    @GetMapping("/{profileId}")
+    @ResponseStatus(HttpStatus.OK)
+    public boolean isAdminOfRestaurant(@PathVariable Long restaurantId,
+                                       @PathVariable Long profileId) {
+        log.info("Check if profile {} is admin of restaurant {}", profileId, restaurantId);
+        return service.isAdminOfRestaurant(restaurantId, profileId);
     }
 }

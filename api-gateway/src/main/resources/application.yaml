@@ -28,7 +28,7 @@ spring:
             - id: reservation-service
               uri: http://localhost:${RESERVATION_SERVICE_PORT:8084}
               predicates:
-                - Path=/api/v1/reservations/**
+                - Path=/api/v1/reservations/**,/api/v1/restaurant-tables/**,/api/v1/floor-schema/**
 
             - id: order-service
               uri: http://localhost:${ORDER_SERVICE_PORT:8085}

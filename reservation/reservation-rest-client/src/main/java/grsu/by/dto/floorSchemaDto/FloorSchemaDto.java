@@ -1,4 +1,4 @@
-package grsu.by.dto.restaurantTableDto;
+package grsu.by.dto.floorSchemaDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,15 +6,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RestaurantTableFullDto {
-    private Long id;
+@Builder
+public class FloorSchemaDto {
     private Long restaurantId;
-    private String number;
-    private Short capacity;
-    private String status;
+    private List<FloorElementDto> elements;
+    private Double canvasWidth;
+    private Double canvasHeight;
 }

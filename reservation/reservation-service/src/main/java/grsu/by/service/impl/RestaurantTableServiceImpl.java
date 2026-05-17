@@ -29,6 +29,21 @@ public class RestaurantTableServiceImpl implements RestaurantTableService {
         return mapper.map(restaurantTableRepository.save(table), RestaurantTableFullDto.class);
     }
 
+    @Transactional
+    @Override
+    public List<RestaurantTableFullDto> createAll(List<RestaurantTableCreationDto> creationDtos) {
+        List<RestaurantTable> tables = creationDtos.stream()
+                .map(dto -> {
+                    RestaurantTable t = mapper.map(dto, RestaurantTable.class);
+                    t.setStatus(RestaurantTableStatus.AVAILABLE);
+                    return t;
+                })
+                .toList();
+        return restaurantTableRepository.saveAll(tables).stream()
+                .map(t -> mapper.map(t, RestaurantTableFullDto.class))
+                .toList();
+    }
+
     @Override
     public RestaurantTableFullDto findById(Long id) {
         RestaurantTable table = restaurantTableRepository.findById(id)
@@ -57,5 +72,19 @@ public class RestaurantTableServiceImpl implements RestaurantTableService {
                 .orElseThrow(() -> new EntityNotFoundException("Restaurant table with id " + id + " not found"));
         table.setStatus(status);
         return mapper.map(restaurantTableRepository.save(table), RestaurantTableFullDto.class);
+    }
+
+    @Transactional
+    @Override
+    public void delete(Long id) {
+        restaurantTableRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant table not found: " + id));
+        restaurantTableRepository.deleteById(id);
+    }
+
+    @Transactional
+    @Override
+    public void deleteAllByIds(List<Long> ids) {
+        restaurantTableRepository.deleteAllById(ids);
     }
 }

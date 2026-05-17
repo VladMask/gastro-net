@@ -10,6 +10,8 @@ public interface RestaurantTableService {
 
     RestaurantTableFullDto create(RestaurantTableCreationDto creationDto);
 
+    List<RestaurantTableFullDto> createAll(List<RestaurantTableCreationDto> creationDtos);
+
     RestaurantTableFullDto findById(Long id);
 
     List<RestaurantTableFullDto> findByRestaurantId(Long restaurantId);
@@ -17,4 +19,8 @@ public interface RestaurantTableService {
     List<RestaurantTableFullDto> findByRestaurantIdAndStatus(Long restaurantId, RestaurantTableStatus status);
 
     RestaurantTableFullDto updateStatus(Long id, RestaurantTableStatus status);
+
+    void delete(Long id);
+
+    void deleteAllByIds(List<Long> ids);
 }

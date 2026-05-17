@@ -32,4 +32,9 @@ public class RestaurantAdminServiceImpl implements RestaurantAdminService {
     public void removeAdmin(Long restaurantId, Long profileId) {
         restaurantAdminRepository.deleteByProfileIdAndRestaurantId(profileId, restaurantId);
     }
+
+    @Override
+    public boolean isAdminOfRestaurant(Long restaurantId, Long profileId) {
+        return restaurantAdminRepository.existsByProfileIdAndRestaurantId(profileId, restaurantId);
+    }
 }

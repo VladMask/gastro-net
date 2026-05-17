@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +24,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/restaurants/tables")
+@RequestMapping("/api/v1/restaurant-tables")
 @Slf4j
 public class RestaurantTableController {
 
@@ -30,9 +32,19 @@ public class RestaurantTableController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('PLATFORM_ADMIN') or hasRole('RESTAURANT_ADMIN')")
     public RestaurantTableFullDto create(@RequestBody @Valid RestaurantTableCreationDto creationDto) {
         log.info("Create RestaurantTable request received");
         return service.create(creationDto);
+    }
+
+    @PostMapping("/batch")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('PLATFORM_ADMIN') or hasRole('RESTAURANT_ADMIN')")
+    public List<RestaurantTableFullDto> createAll(
+            @RequestBody @Valid List<RestaurantTableCreationDto> tableCreationDtos) {
+        log.info("Batch create {} RestaurantTables", tableCreationDtos.size());
+        return service.createAll(tableCreationDtos);
     }
 
     @GetMapping("/{id}")
@@ -46,20 +58,33 @@ public class RestaurantTableController {
     @ResponseStatus(HttpStatus.OK)
     public List<RestaurantTableFullDto> findByRestaurantId(
             @RequestParam Long restaurantId,
-            @RequestParam(required = false) RestaurantTableStatus status
-    ) {
-        if (status != null) {
-            return service.findByRestaurantIdAndStatus(restaurantId, status);
-        }
+            @RequestParam(required = false) RestaurantTableStatus status) {
+        if (status != null) return service.findByRestaurantIdAndStatus(restaurantId, status);
         return service.findByRestaurantId(restaurantId);
     }
 
     @PatchMapping("/{id}/status")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('PLATFORM_ADMIN') or hasRole('RESTAURANT_ADMIN')")
     public RestaurantTableFullDto updateStatus(
             @PathVariable Long id,
-            @RequestParam RestaurantTableStatus status
-    ) {
+            @RequestParam RestaurantTableStatus status) {
         return service.updateStatus(id, status);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('PLATFORM_ADMIN') or hasRole('RESTAURANT_ADMIN')")
+    public void delete(@PathVariable Long id) {
+        log.info("Delete RestaurantTable id={}", id);
+        service.delete(id);
+    }
+
+    @DeleteMapping("/batch")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('PLATFORM_ADMIN') or hasRole('RESTAURANT_ADMIN')")
+    public void deleteAll(@RequestBody List<Long> ids) {
+        log.info("Batch delete {} RestaurantTables", ids.size());
+        service.deleteAllByIds(ids);
     }
 }
