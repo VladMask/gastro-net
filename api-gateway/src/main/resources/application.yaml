@@ -45,11 +45,6 @@ spring:
               predicates:
                 - Path=/api/v1/notifications/**
 
-            - id: invoice-service
-              uri: http://localhost:${INVOICE_SERVICE_PORT:8089}
-              predicates:
-                - Path=/api/v1/invoices/**
-
 logging:
   pattern:
     correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

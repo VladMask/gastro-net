@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import grsu.by.dto.mealDto.MealCreationDto;
 import grsu.by.dto.mealDto.MealFullDto;
-import grsu.by.dto.mealDto.MealInvoiceInfo;
 import grsu.by.service.MealService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -84,11 +83,5 @@ public class MealController {
     @PreAuthorize("hasRole('PLATFORM_ADMIN') or hasRole('RESTAURANT_ADMIN')")
     public void deletePhoto(@PathVariable Long id) {
         service.deletePhoto(id);
-    }
-
-    @GetMapping("/info")
-    @ResponseStatus(HttpStatus.OK)
-    public List<MealInvoiceInfo> findByIds(@RequestParam List<Long> ids) {
-        return service.findByIds(ids);
     }
 }

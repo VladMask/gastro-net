@@ -2,7 +2,6 @@ package grsu.by.service.impl;
 
 import grsu.by.dto.mealDto.MealCreationDto;
 import grsu.by.dto.mealDto.MealFullDto;
-import grsu.by.dto.mealDto.MealInvoiceInfo;
 import grsu.by.entity.Meal;
 import grsu.by.entity.MealCategory;
 import grsu.by.entity.Restaurant;
@@ -34,14 +33,6 @@ public class MealServiceImpl implements MealService {
     private final ModelMapper mapper;
     private final RestaurantSecurity restaurantSecurity;
     private final StorageService storageService;
-
-    @Override
-    public List<MealInvoiceInfo> findByIds(List<Long> ids) {
-        List<Meal> meals = mealRepository.findAllById(ids);
-        return meals.stream()
-                .map(meal -> mapper.map(meal, MealInvoiceInfo.class))
-                .toList();
-    }
 
     @Transactional
     @Override

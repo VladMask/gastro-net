@@ -3,7 +3,6 @@ package grsu.by;
 import grsu.by.config.properties.UserRestClientProperties;
 import grsu.by.dto.EmailResponse;
 import grsu.by.dto.UserCreationDto;
-import grsu.by.dto.UserShortDto;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpHeaders;
@@ -31,14 +30,6 @@ public class UserRestClient {
                 .body(creationDto)
                 .retrieve()
                 .body(Long.class);
-    }
-
-    public UserShortDto findById(Long userId) {
-        return restClient
-                .get()
-                .uri("/api/v1/users/" + userId)
-                .retrieve()
-                .body(UserShortDto.class);
     }
 
     public EmailResponse getEmailByUserId(Long userId) {

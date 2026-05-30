@@ -1,7 +1,6 @@
 package grsu.by;
 
 import grsu.by.config.properties.PaymentRestClientProperties;
-import grsu.by.dto.paymentDto.PaymentInvoiceDto;
 import grsu.by.dto.paymentDto.PaymentShortDto;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -41,11 +40,4 @@ public class PaymentRestClient {
                 .body(Boolean.class);
     }
 
-    public PaymentInvoiceDto getInvoiceDataById(Long paymentId) {
-        return restClient
-                .get()
-                .uri("/api/v1/payments/invoices/" + paymentId)
-                .retrieve()
-                .body(PaymentInvoiceDto.class);
-    }
 }
