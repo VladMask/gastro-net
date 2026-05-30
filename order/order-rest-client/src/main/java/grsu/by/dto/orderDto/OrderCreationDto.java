@@ -20,7 +20,6 @@ public class OrderCreationDto {
     @Positive
     private Long restaurantId;
     private Long userId;
-    private Long reservationId;
     @NotEmpty
     private List<OrderMealCreationDto> orderMeals;
 }

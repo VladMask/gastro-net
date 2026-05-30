@@ -13,4 +13,5 @@ public interface OrderService {
     OrderFullDto findByIdWithDetails(Long id);
     List<OrderShortDto> findByUserId(Long userId);
     OrderShortDto updateStatus(Long id, OrderStatus status);
+    List<OrderShortDto> findByRestaurantId(Long restaurantId);
 }

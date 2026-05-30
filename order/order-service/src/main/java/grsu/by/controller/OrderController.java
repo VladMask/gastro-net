@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -26,40 +27,52 @@ import java.util.List;
 @RequestMapping("/api/v1/orders")
 @Slf4j
 public class OrderController {
+
     private final OrderService service;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderShortDto create(@RequestBody @Valid OrderCreationDto creationDto) {
-        log.info("Create request received");
+    public OrderShortDto create(
+            @RequestBody @Valid OrderCreationDto creationDto,
+            @RequestHeader("X-Auth-Profile-Id") Long profileId) {
+        log.info("Create order request received for profileId={}", profileId);
+        creationDto.setUserId(profileId);
         return service.create(creationDto);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public OrderShortDto findById(@PathVariable Long id) {
-        log.info("Find Order by id {}", id);
+        log.info("Find Order by id={}", id);
         return service.findById(id);
     }
 
     @GetMapping("/{id}/details")
     @ResponseStatus(HttpStatus.OK)
     public OrderFullDto findByIdWithDetails(@PathVariable Long id) {
-        log.info("Find Order with details by id {}", id);
+        log.info("Find Order with details by id={}", id);
         return service.findByIdWithDetails(id);
     }
 
-    @GetMapping
+    @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
     public List<OrderShortDto> findByUserId(@RequestParam Long userId) {
-        log.info("Find Orders for user {}", userId);
+        log.info("Find Orders for user={}", userId);
         return service.findByUserId(userId);
+    }
+
+    @GetMapping("/restaurants")
+    @ResponseStatus(HttpStatus.OK)
+    public List<OrderShortDto> findByRestaurantId(@RequestParam Long restaurantId) {
+        log.info("Find Orders for restaurant={}", restaurantId);
+        return service.findByRestaurantId(restaurantId);
     }
 
     @PatchMapping("/{id}/status")
     @ResponseStatus(HttpStatus.OK)
-    public OrderShortDto updateStatus(@PathVariable Long id, @RequestParam OrderStatus status) {
-        log.info("Update Order {} status to {}", id, status);
+    public OrderShortDto updateStatus(@PathVariable Long id,
+                                      @RequestParam OrderStatus status) {
+        log.info("Update Order id={} status to {}", id, status);
         return service.updateStatus(id, status);
     }
 }

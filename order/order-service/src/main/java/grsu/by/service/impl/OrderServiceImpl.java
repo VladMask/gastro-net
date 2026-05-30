@@ -1,6 +1,5 @@
 package grsu.by.service.impl;
 
-import grsu.by.ReservationRestClient;
 import grsu.by.dto.orderDto.OrderCreationDto;
 import grsu.by.dto.orderDto.OrderFullDto;
 import grsu.by.dto.orderDto.OrderShortDto;
@@ -15,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,18 +24,10 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderMealRepository orderMealRepository;
     private final ModelMapper mapper;
-    private final ReservationRestClient reservationRestClient;
 
     @Transactional
     @Override
     public OrderShortDto create(OrderCreationDto creationDto) {
-        if (creationDto.getReservationId() != null) {
-            try {
-                reservationRestClient.findReservationById(creationDto.getReservationId());
-            } catch (HttpClientErrorException e) {
-                throw new EntityNotFoundException("No active reservation was found");
-            }
-        }
 
         Order order = mapper.map(creationDto, Order.class);
         order.setStatus(OrderStatus.CREATED);
@@ -86,6 +76,13 @@ public class OrderServiceImpl implements OrderService {
         );
         order.setStatus(status);
         return mapper.map(orderRepository.save(order), OrderShortDto.class);
+    }
+
+    @Override
+    public List<OrderShortDto> findByRestaurantId(Long restaurantId) {
+        return orderRepository.findByRestaurantId(restaurantId).stream()
+                .map(order -> mapper.map(order, OrderShortDto.class))
+                .toList();
     }
 
     private BigDecimal computeTotalPrice(List<OrderMeal> meals) {
