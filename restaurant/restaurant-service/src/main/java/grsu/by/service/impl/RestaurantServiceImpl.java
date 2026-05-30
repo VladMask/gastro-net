@@ -7,11 +7,13 @@ import grsu.by.entity.Restaurant;
 import grsu.by.repository.RestaurantRepository;
 import grsu.by.service.RestaurantService;
 import grsu.by.service.StorageService;
+import grsu.by.specification.RestaurantSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -103,10 +105,15 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     public PagedDataDto<RestaurantShortDto> search(String name, BigDecimal minRating, Pageable pageable) {
-        Page<Restaurant> restaurants = restaurantRepository.findByNameAndRating(name, minRating, pageable);
-        List<RestaurantShortDto> dtos = restaurants.stream()
+        Specification<Restaurant> spec = RestaurantSpecification.nameLike(name)
+                .and(RestaurantSpecification.minRating(minRating));
+
+        Page<Restaurant> page = restaurantRepository.findAll(spec, pageable);
+
+        List<RestaurantShortDto> data = page.getContent().stream()
                 .map(r -> mapper.map(r, RestaurantShortDto.class))
-                .collect(Collectors.toList());
-        return new PagedDataDto<>(dtos, restaurants.getTotalElements());
+                .toList();
+
+        return new PagedDataDto<>(data, page.getTotalElements());
     }
 }
