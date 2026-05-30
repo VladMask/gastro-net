@@ -32,6 +32,8 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+    @Column(name = "stripe_payment_intent_id")
+    private String stripePaymentIntentId;
     @Column(name = "order_id")
     private Long orderId;
     @Column(name = "user_id")

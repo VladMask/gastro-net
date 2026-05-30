@@ -92,6 +92,11 @@
             <artifactId>shedlock-provider-jdbc-template</artifactId>
             <version>6.9.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>32.0.0</version>
+        </dependency>
 
         <dependency>
             <groupId>grsu.by</groupId>

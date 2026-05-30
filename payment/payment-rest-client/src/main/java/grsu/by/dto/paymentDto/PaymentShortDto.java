@@ -15,6 +15,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 public class PaymentShortDto {
+    private Long id;
     private BigDecimal amount;
     private String paymentMethod;
     private String status;

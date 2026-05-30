@@ -3,3 +3,10 @@
     url: ${DB_URL:jdbc:postgresql://localhost:5436/gn-payment-service}
     username: ${DB_USER:postgress}
     password: ${DB_PASSWORD:postgress}
+
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET}
+  publishable-key: ${STRIPE_PUBLISHABLE_KEY}
+  currency: byn
