@@ -29,21 +29,23 @@ import java.util.List;
 @RequestMapping("/api/v1/meals")
 @RequiredArgsConstructor
 public class MealController {
+
     private final MealService service;
     private final ObjectMapper objectMapper;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('PLATFORM_ADMIN') or hasRole('RESTAURANT_ADMIN') and restaurantSecurity.isAdminOf(#creationDto.restaurantId)")
+    @PreAuthorize("hasRole('PLATFORM_ADMIN') or (hasRole('RESTAURANT_ADMIN') and @restaurantSecurity.isAdminOf(#restaurantId))")
     public MealFullDto create(
             @RequestParam("meal") String jsonPart,
+            @RequestParam("restaurantId") Long restaurantId,
             @RequestPart(value = "photo", required = false) MultipartFile photo
     ) throws JsonProcessingException {
         MealCreationDto creationDto = objectMapper.readValue(jsonPart, MealCreationDto.class);
         return service.create(creationDto, photo);
     }
 
-     @GetMapping("/{id}")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public MealFullDto findById(@PathVariable Long id) {
         return service.findById(id);
@@ -57,8 +59,7 @@ public class MealController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('PLATFORM_ADMIN') or " +
-            "(hasRole('RESTAURANT_ADMIN') and @restaurantSecurity.isAdminOf(#updateDto.restaurantId))")
+    @PreAuthorize("hasRole('PLATFORM_ADMIN') or hasRole('RESTAURANT_ADMIN')")
     public MealFullDto update(@PathVariable Long id, @RequestBody @Valid MealCreationDto updateDto) {
         return service.update(id, updateDto);
     }

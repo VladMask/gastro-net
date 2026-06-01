@@ -17,6 +17,11 @@ spring:
   liquibase:
     change-log: classpath:reservation-service-db/changelog.xml
 
+rest:
+  client:
+    restaurant-service:
+      base-url: ${RESTAURANT_SERVICE_URL}
+
 exception:
   dto-factory:
     service-id: reservation-service

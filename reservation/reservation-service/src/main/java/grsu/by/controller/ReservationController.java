@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ public class ReservationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("isAuthenticated()")
     public ReservationFullDto create(@RequestBody @Valid ReservationCreationDto creationDto) {
         log.info("Create reservation request received");
         return service.create(creationDto);
@@ -36,6 +38,7 @@ public class ReservationController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("isAuthenticated()")
     public ReservationFullDto findById(@PathVariable Long id) {
         log.info("Find Reservation by id {}", id);
         return service.findById(id);
@@ -43,18 +46,21 @@ public class ReservationController {
 
     @PatchMapping("/{id}/confirm")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('PLATFORM_ADMIN') or hasRole('RESTAURANT_ADMIN')")
     public void confirmReservationById(@PathVariable Long id) {
         service.confirmReservationById(id);
     }
 
     @PatchMapping("/{id}/cancel")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("isAuthenticated()")
     public void cancelReservationById(@PathVariable Long id) {
         service.cancelReservationById(id);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("isAuthenticated()")
     public List<ReservationFullDto> findByUserId(@RequestParam Long userId) {
         log.info("Find reservations for user {}", userId);
         return service.findByUserId(userId);
@@ -62,6 +68,7 @@ public class ReservationController {
 
     @GetMapping("/restaurant/{restaurantId}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('PLATFORM_ADMIN') or (hasRole('RESTAURANT_ADMIN') and @reservationSecurity.isAdminOfRestaurant(#restaurantId))")
     public List<ReservationFullDto> findByRestaurantId(@PathVariable Long restaurantId) {
         log.info("Find reservations for restaurant {}", restaurantId);
         return service.findByRestaurantId(restaurantId);

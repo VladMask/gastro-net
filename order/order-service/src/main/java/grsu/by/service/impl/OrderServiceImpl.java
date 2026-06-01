@@ -8,10 +8,12 @@ import grsu.by.entity.OrderMeal;
 import grsu.by.enums.OrderStatus;
 import grsu.by.repository.OrderMealRepository;
 import grsu.by.repository.OrderRepository;
+import grsu.by.security.OrderSecurity;
 import grsu.by.service.OrderService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,43 +23,38 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
+
     private final OrderRepository orderRepository;
     private final OrderMealRepository orderMealRepository;
     private final ModelMapper mapper;
+    private final OrderSecurity orderSecurity;
 
     @Transactional
     @Override
     public OrderShortDto create(OrderCreationDto creationDto) {
-
         Order order = mapper.map(creationDto, Order.class);
         order.setStatus(OrderStatus.CREATED);
-
         List<OrderMeal> orderMeals = order.getOrderMeals();
         order.setTotalPrice(computeTotalPrice(orderMeals));
         order.setOrderMeals(null);
-
         Long orderId = orderRepository.save(order).getId();
-
         orderMeals.forEach(orderMeal -> orderMeal.setOrderId(orderId));
         orderMealRepository.saveAll(orderMeals);
-
         order.setId(orderId);
         return mapper.map(order, OrderShortDto.class);
     }
 
     @Override
     public OrderShortDto findById(Long id) {
-        Order order = orderRepository.findWithDetailsById(id).orElseThrow(
-                () -> new EntityNotFoundException("Order not found")
-        );
+        Order order = orderRepository.findWithDetailsById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
         return mapper.map(order, OrderShortDto.class);
     }
 
     @Override
     public OrderFullDto findByIdWithDetails(Long id) {
-        Order order = orderRepository.findWithDetailsById(id).orElseThrow(
-                () -> new EntityNotFoundException("Order not found")
-        );
+        Order order = orderRepository.findWithDetailsById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
         return mapper.map(order, OrderFullDto.class);
     }
 
@@ -68,21 +65,27 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
     }
 
-    @Transactional
-    @Override
-    public OrderShortDto updateStatus(Long id, OrderStatus status) {
-        Order order = orderRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Order not found")
-        );
-        order.setStatus(status);
-        return mapper.map(orderRepository.save(order), OrderShortDto.class);
-    }
-
     @Override
     public List<OrderShortDto> findByRestaurantId(Long restaurantId) {
         return orderRepository.findByRestaurantId(restaurantId).stream()
                 .map(order -> mapper.map(order, OrderShortDto.class))
                 .toList();
+    }
+
+    @Transactional
+    @Override
+    public OrderShortDto updateStatus(Long id, OrderStatus status) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+        checkAdminOf(order.getRestaurantId());
+        order.setStatus(status);
+        return mapper.map(orderRepository.save(order), OrderShortDto.class);
+    }
+
+    private void checkAdminOf(Long restaurantId) {
+        if (!orderSecurity.isAdminOfRestaurant(restaurantId)) {
+            throw new AccessDeniedException("You are not an admin of this restaurant");
+        }
     }
 
     private BigDecimal computeTotalPrice(List<OrderMeal> meals) {

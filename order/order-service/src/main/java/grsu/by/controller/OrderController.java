@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,6 +64,7 @@ public class OrderController {
 
     @GetMapping("/restaurants")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('PLATFORM_ADMIN') or (hasRole('RESTAURANT_ADMIN') and @orderSecurity.isAdminOfRestaurant(#restaurantId))")
     public List<OrderShortDto> findByRestaurantId(@RequestParam Long restaurantId) {
         log.info("Find Orders for restaurant={}", restaurantId);
         return service.findByRestaurantId(restaurantId);
@@ -70,6 +72,7 @@ public class OrderController {
 
     @PatchMapping("/{id}/status")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('PLATFORM_ADMIN') or hasRole('RESTAURANT_ADMIN')")
     public OrderShortDto updateStatus(@PathVariable Long id,
                                       @RequestParam OrderStatus status) {
         log.info("Update Order id={} status to {}", id, status);

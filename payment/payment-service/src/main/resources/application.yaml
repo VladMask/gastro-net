@@ -24,10 +24,10 @@ spring:
 
 rest:
   client:
-    order-service:
-      base-url: http://localhost:${ORDER_SERVICE_PORT:8085}
     reservation-service:
-      base-url: http://localhost:${RESERVATION_SERVICE_PORT:8084}
+      base-url: ${RESERVATION_SERVICE_URL}
+    order-service:
+      base-url: ${ORDER_SERVICE_URL}
 
 payment:
   service:

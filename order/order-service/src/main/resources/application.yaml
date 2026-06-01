@@ -19,8 +19,8 @@ spring:
 
 rest:
   client:
-    reservation-service:
-      base-url: http://localhost:${RESERVATION_SERVICE_PORT:8084}
+    restaurant-service:
+      base-url: ${RESTAURANT_SERVICE_URL}
 
 exception:
   dto-factory:

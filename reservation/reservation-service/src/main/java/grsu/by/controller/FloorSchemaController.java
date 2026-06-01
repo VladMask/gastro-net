@@ -24,8 +24,6 @@ public class FloorSchemaController {
 
     @GetMapping("/{restaurantId}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('PLATFORM_ADMIN') or " +
-            "(hasRole('RESTAURANT_ADMIN') and @reservationSecurity.isAdminOfRestaurant(#restaurantId))")
     public FloorSchemaDto findByRestaurantId(@PathVariable Long restaurantId) {
         log.info("Get floor schema for restaurant {}", restaurantId);
         return floorSchemaService.findByRestaurantId(restaurantId);

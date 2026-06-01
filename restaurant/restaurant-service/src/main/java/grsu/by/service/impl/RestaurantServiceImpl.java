@@ -80,7 +80,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         Restaurant restaurant = restaurantRepository.findById(restaurantId).orElseThrow(
                 () -> new EntityNotFoundException("Restaurant not found")
         );
-        // Delete old photo if exists
+
         if (restaurant.getPreviewPhotoUrl() != null) {
             storageService.delete(restaurant.getPreviewPhotoUrl());
         }

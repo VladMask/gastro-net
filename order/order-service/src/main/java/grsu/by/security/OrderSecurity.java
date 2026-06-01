@@ -6,9 +6,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-@Component("reservationSecurity")
+@Component("orderSecurity")
 @RequiredArgsConstructor
-public class ReservationSecurity {
+public class OrderSecurity {
 
     private final RestaurantRestClient restaurantRestClient;
 

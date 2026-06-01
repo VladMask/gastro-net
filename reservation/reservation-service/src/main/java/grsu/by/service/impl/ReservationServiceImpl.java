@@ -8,10 +8,12 @@ import grsu.by.enums.ReservationStatus;
 import grsu.by.enums.RestaurantTableStatus;
 import grsu.by.repository.ReservationRepository;
 import grsu.by.repository.RestaurantTableRepository;
+import grsu.by.security.ReservationSecurity;
 import grsu.by.service.ReservationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,41 +28,38 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationRepository reservationRepository;
     private final RestaurantTableRepository restaurantTableRepository;
     private final ModelMapper mapper;
+    private final ReservationSecurity reservationSecurity;
 
     @Transactional
     @Override
     public ReservationFullDto create(ReservationCreationDto creationDto) {
-        List<RestaurantTable> tables = restaurantTableRepository.findAllById(creationDto.getRestaurantTablesIds());
+        List<RestaurantTable> tables = restaurantTableRepository
+                .findAllById(creationDto.getRestaurantTablesIds());
         validateReservationCreation(creationDto, tables);
-
         Instant reservedUntil = creationDto.getReservedUntil() != null
                 ? creationDto.getReservedUntil()
                 : creationDto.getReservedAt().plus(2, ChronoUnit.HOURS);
-
         boolean hasOverlap = reservationRepository.existsOverlappingReservation(
                 creationDto.getRestaurantTablesIds(),
                 creationDto.getReservedAt(),
-                reservedUntil
-        );
+                reservedUntil);
         if (hasOverlap) {
-            throw new IllegalArgumentException("One or more tables are already reserved for the requested time slot");
+            throw new IllegalArgumentException(
+                    "One or more tables are already reserved for the requested time slot");
         }
-
         Reservation reservation = mapper.map(creationDto, Reservation.class);
         reservation.setReservedUntil(reservedUntil);
         reservation.setRestaurantTables(tables);
         reservation.setStatus(ReservationStatus.CREATED);
-
         tables.forEach(table -> table.setStatus(RestaurantTableStatus.RESERVED));
-
         return mapper.map(reservationRepository.save(reservation), ReservationFullDto.class);
     }
 
     @Override
     public ReservationFullDto findById(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Reservation not found"));
-        return mapper.map(reservation, ReservationFullDto.class);
+        return mapper.map(reservationRepository.findById(id)
+                        .orElseThrow(() -> new EntityNotFoundException("Reservation not found")),
+                ReservationFullDto.class);
     }
 
     @Transactional
@@ -68,6 +67,7 @@ public class ReservationServiceImpl implements ReservationService {
     public void confirmReservationById(Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reservation not found"));
+        checkAdminOf(reservation.getRestaurantId());
         if (reservation.getStatus() != ReservationStatus.CREATED) {
             throw new IllegalStateException("Only CREATED reservations can be confirmed");
         }
@@ -80,6 +80,7 @@ public class ReservationServiceImpl implements ReservationService {
     public void cancelReservationById(Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reservation not found"));
+        checkOwnerOrAdmin(reservation);
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
             throw new IllegalStateException("Reservation is already cancelled");
         }
@@ -110,7 +111,6 @@ public class ReservationServiceImpl implements ReservationService {
                 .findByStatusAndReservedUntilBefore(ReservationStatus.CREATED, Instant.now());
         toExpire.addAll(reservationRepository
                 .findByStatusAndReservedUntilBefore(ReservationStatus.CONFIRMED, Instant.now()));
-
         toExpire.forEach(r -> {
             r.setStatus(ReservationStatus.EXPIRED);
             r.getRestaurantTables().forEach(t -> t.setStatus(RestaurantTableStatus.AVAILABLE));
@@ -118,12 +118,32 @@ public class ReservationServiceImpl implements ReservationService {
         reservationRepository.saveAll(toExpire);
     }
 
-    private void validateReservationCreation(ReservationCreationDto creationDto, List<RestaurantTable> tables) {
+
+    private void checkAdminOf(Long restaurantId) {
+        if (!reservationSecurity.isAdminOfRestaurant(restaurantId)) {
+            throw new AccessDeniedException("You are not an admin of this restaurant");
+        }
+    }
+
+    private void checkOwnerOrAdmin(Reservation reservation) {
+        Long currentProfileId = reservationSecurity.getCurrentProfileId();
+        boolean isOwner = currentProfileId != null
+                && currentProfileId.equals(reservation.getUserId());
+        boolean isAdmin = reservationSecurity.isAdminOfRestaurant(reservation.getRestaurantId());
+        if (!isOwner && !isAdmin) {
+            throw new AccessDeniedException("Access denied");
+        }
+    }
+
+    private void validateReservationCreation(ReservationCreationDto creationDto,
+                                             List<RestaurantTable> tables) {
         if (tables.isEmpty()) {
             throw new EntityNotFoundException("RestaurantTables not found");
         }
-        if (creationDto.getGuestsCount() > tables.stream().mapToInt(RestaurantTable::getCapacity).sum()) {
-            throw new IllegalArgumentException("Guests count cannot be greater than tables capacity");
+        if (creationDto.getGuestsCount() > tables.stream()
+                .mapToInt(RestaurantTable::getCapacity).sum()) {
+            throw new IllegalArgumentException(
+                    "Guests count cannot be greater than tables capacity");
         }
         boolean anyUnavailable = tables.stream()
                 .anyMatch(t -> t.getStatus() == RestaurantTableStatus.UNAVAILABLE);

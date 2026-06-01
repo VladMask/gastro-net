@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 public class MealCreationDto {
     @NotBlank
     private String name;
-    private String photoUrl;
     private String description;
     private String ingredients;
     @NotNull

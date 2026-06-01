@@ -20,7 +20,7 @@ public class RestaurantRestClient {
         return Boolean.TRUE.equals(
                 restClient
                         .get()
-                        .uri("/api/v1/restaurants/internal/{restaurantId}/admins/{profileId}",
+                        .uri("/api/v1/restaurants/{restaurantId}/admins/{profileId}",
                                 restaurantId, profileId)
                         .retrieve()
                         .body(Boolean.class)
