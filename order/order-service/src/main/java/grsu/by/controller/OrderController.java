@@ -8,6 +8,10 @@ import grsu.by.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,8 +24,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -57,17 +59,27 @@ public class OrderController {
 
     @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderShortDto> findByUserId(@RequestParam Long userId) {
+    public Page<OrderShortDto> findByUserId(
+            @RequestParam Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
         log.info("Find Orders for user={}", userId);
-        return service.findByUserId(userId);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return service.findByUserId(userId, pageable);
     }
 
     @GetMapping("/restaurants")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('PLATFORM_ADMIN') or (hasRole('RESTAURANT_ADMIN') and @orderSecurity.isAdminOfRestaurant(#restaurantId))")
-    public List<OrderShortDto> findByRestaurantId(@RequestParam Long restaurantId) {
+    public Page<OrderShortDto> findByRestaurantId(
+            @RequestParam Long restaurantId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
         log.info("Find Orders for restaurant={}", restaurantId);
-        return service.findByRestaurantId(restaurantId);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return service.findByRestaurantId(restaurantId, pageable);
     }
 
     @PatchMapping("/{id}/status")

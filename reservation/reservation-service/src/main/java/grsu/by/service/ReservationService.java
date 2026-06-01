@@ -2,8 +2,8 @@ package grsu.by.service;
 
 import grsu.by.dto.reservationDto.ReservationCreationDto;
 import grsu.by.dto.reservationDto.ReservationFullDto;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ReservationService {
 
@@ -15,9 +15,9 @@ public interface ReservationService {
 
     void cancelReservationById(Long id);
 
-    List<ReservationFullDto> findByUserId(Long userId);
+    Page<ReservationFullDto> findByUserId(Long userId, Pageable pageable);
 
-    List<ReservationFullDto> findByRestaurantId(Long restaurantId);
+    Page<ReservationFullDto> findByRestaurantId(Long restaurantId, Pageable pageable);
 
     void expireOutdatedReservations();
 }

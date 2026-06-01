@@ -13,6 +13,8 @@ import grsu.by.service.ReservationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,17 +93,15 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public List<ReservationFullDto> findByUserId(Long userId) {
-        return reservationRepository.findByUserId(userId).stream()
-                .map(r -> mapper.map(r, ReservationFullDto.class))
-                .toList();
+    public Page<ReservationFullDto> findByUserId(Long userId, Pageable pageable) {
+        return reservationRepository.findByUserId(userId, pageable)
+                .map(r -> mapper.map(r, ReservationFullDto.class));
     }
 
     @Override
-    public List<ReservationFullDto> findByRestaurantId(Long restaurantId) {
-        return reservationRepository.findByRestaurantId(restaurantId).stream()
-                .map(r -> mapper.map(r, ReservationFullDto.class))
-                .toList();
+    public Page<ReservationFullDto> findByRestaurantId(Long restaurantId, Pageable pageable) {
+        return reservationRepository.findByRestaurantId(restaurantId, pageable)
+                .map(r -> mapper.map(r, ReservationFullDto.class));
     }
 
     @Transactional

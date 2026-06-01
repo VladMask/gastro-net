@@ -2,6 +2,8 @@ package grsu.by.repository;
 
 import grsu.by.entity.Reservation;
 import grsu.by.enums.ReservationStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,9 +27,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("reservedUntil") Instant reservedUntil
     );
 
-    List<Reservation> findByUserId(Long userId);
+    Page<Reservation> findByUserId(Long userId, Pageable pageable);
 
-    List<Reservation> findByRestaurantId(Long restaurantId);
+    Page<Reservation> findByRestaurantId(Long restaurantId, Pageable pageable);
 
     List<Reservation> findByStatusAndReservedUntilBefore(ReservationStatus status, Instant now);
 }

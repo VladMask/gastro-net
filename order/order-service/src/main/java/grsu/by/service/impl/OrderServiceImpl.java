@@ -13,6 +13,8 @@ import grsu.by.service.OrderService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,17 +61,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderShortDto> findByUserId(Long userId) {
-        return orderRepository.findByUserId(userId).stream()
-                .map(order -> mapper.map(order, OrderShortDto.class))
-                .toList();
+    public Page<OrderShortDto> findByUserId(Long userId, Pageable pageable) {
+        return orderRepository.findByUserId(userId, pageable)
+                .map(order -> mapper.map(order, OrderShortDto.class));
     }
 
     @Override
-    public List<OrderShortDto> findByRestaurantId(Long restaurantId) {
-        return orderRepository.findByRestaurantId(restaurantId).stream()
-                .map(order -> mapper.map(order, OrderShortDto.class))
-                .toList();
+    public Page<OrderShortDto> findByRestaurantId(Long restaurantId, Pageable pageable) {
+        return orderRepository.findByRestaurantId(restaurantId, pageable)
+                .map(order -> mapper.map(order, OrderShortDto.class));
     }
 
     @Transactional
