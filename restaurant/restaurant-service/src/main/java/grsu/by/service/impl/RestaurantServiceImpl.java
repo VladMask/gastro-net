@@ -1,9 +1,11 @@
 package grsu.by.service.impl;
 
-import grsu.by.dto.PagedDataDto;
+import grsu.by.dto.restaurantDto.RestaurantApplicationDto;
 import grsu.by.dto.restaurantDto.RestaurantCreationDto;
+import grsu.by.dto.restaurantDto.RestaurantFullDto;
 import grsu.by.dto.restaurantDto.RestaurantShortDto;
 import grsu.by.entity.Restaurant;
+import grsu.by.enums.RestaurantStatus;
 import grsu.by.repository.RestaurantRepository;
 import grsu.by.service.RestaurantService;
 import grsu.by.service.StorageService;
@@ -19,8 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -58,20 +58,32 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public RestaurantShortDto findById(Long id) {
+    public RestaurantFullDto findById(Long id) {
         Restaurant restaurant = restaurantRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Restaurant not found")
         );
-        return mapper.map(restaurant, RestaurantShortDto.class);
+        return mapper.map(restaurant, RestaurantFullDto.class);
     }
 
     @Override
-    public PagedDataDto<RestaurantShortDto> findAll(Pageable pageable) {
-        Page<Restaurant> restaurants = restaurantRepository.findAll(pageable);
-        List<RestaurantShortDto> dtos = restaurants.stream()
-                .map(r -> mapper.map(r, RestaurantShortDto.class))
-                .collect(Collectors.toList());
-        return new PagedDataDto<>(dtos, restaurants.getTotalElements());
+    public Page<RestaurantShortDto> findActive(Pageable pageable) {
+        return restaurantRepository.findByStatus(RestaurantStatus.ACTIVE, pageable)
+                .map(r -> mapper.map(r, RestaurantShortDto.class));
+    }
+
+    @Override
+    public Page<RestaurantShortDto> findAll(Pageable pageable) {
+        return restaurantRepository.findAll(pageable)
+                .map(r -> mapper.map(r, RestaurantShortDto.class));
+    }
+
+    @Override
+    public Page<RestaurantShortDto> search(String name, BigDecimal minRating, Pageable pageable) {
+        Specification<Restaurant> spec = RestaurantSpecification.nameLike(name)
+                .and(RestaurantSpecification.minRating(minRating))
+                .and(RestaurantSpecification.hasStatus(RestaurantStatus.ACTIVE));
+        return restaurantRepository.findAll(spec, pageable)
+                .map(r -> mapper.map(r, RestaurantShortDto.class));
     }
 
     @Transactional
@@ -103,17 +115,42 @@ public class RestaurantServiceImpl implements RestaurantService {
         }
     }
 
-    @Override
-    public PagedDataDto<RestaurantShortDto> search(String name, BigDecimal minRating, Pageable pageable) {
-        Specification<Restaurant> spec = RestaurantSpecification.nameLike(name)
-                .and(RestaurantSpecification.minRating(minRating));
+    @Transactional
+    public void applyForRegistration(RestaurantApplicationDto dto, MultipartFile photo) {
+        Restaurant restaurant = mapper.map(dto, Restaurant.class);
+        restaurant.setStatus(RestaurantStatus.PENDING_ACTIVATION);
+        restaurant.setRating(BigDecimal.ZERO);
 
-        Page<Restaurant> page = restaurantRepository.findAll(spec, pageable);
+        restaurant = restaurantRepository.save(restaurant);
 
-        List<RestaurantShortDto> data = page.getContent().stream()
-                .map(r -> mapper.map(r, RestaurantShortDto.class))
-                .toList();
+        if (photo != null) {
+            uploadPhoto(restaurant.getId(), photo);
+        }
 
-        return new PagedDataDto<>(data, page.getTotalElements());
+        restaurantRepository.save(restaurant);
+    }
+
+    @Transactional
+    public RestaurantFullDto approveApplication(Long restaurantId) {
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found"));
+        if (restaurant.getStatus() != RestaurantStatus.PENDING_ACTIVATION) {
+            throw new IllegalStateException("Restaurant is not pending activation");
+        }
+        restaurant.setStatus(RestaurantStatus.ACTIVE);
+        return mapper.map(restaurantRepository.save(restaurant), RestaurantFullDto.class);
+    }
+
+    @Transactional
+    public RestaurantFullDto rejectApplication(Long restaurantId) {
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found"));
+        restaurant.setStatus(RestaurantStatus.INACTIVE);
+        return mapper.map(restaurantRepository.save(restaurant), RestaurantFullDto.class);
+    }
+
+    public Page<RestaurantFullDto> findByStatus(RestaurantStatus status, Pageable pageable) {
+        return restaurantRepository.findByStatus(status, pageable)
+                .map(r -> mapper.map(r, RestaurantFullDto.class));
     }
 }

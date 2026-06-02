@@ -14,13 +14,15 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RestaurantShortDto {
+public class RestaurantFullDto {
     private Long id;
     private String name;
     private String description;
     private BigDecimal rating;
     private String previewPhotoUrl;
+    private String ownerEmail;
     private String contactPhone;
+    private String workingHours;
     private String status;
     private AddressDto address;
 }

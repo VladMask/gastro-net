@@ -25,4 +25,12 @@
         <sqlFile encoding="utf8" path="sql/05.create-restaurant_admins-table.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
+    <changeSet id="06.add-status-column-to-restaurants-table" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/06.add-status-column-to-restaurants-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="07.add-owner_email-column-to-restaurants-table" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/07.add-owner_email-column-to-restaurants-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
 </databaseChangeLog>

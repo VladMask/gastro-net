@@ -1,26 +1,31 @@
 package grsu.by.dto.restaurantDto;
 
 import grsu.by.dto.addressDto.AddressDto;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RestaurantShortDto {
-    private Long id;
+@Builder
+public class RestaurantApplicationDto {
+
+    @NotBlank
     private String name;
     private String description;
-    private BigDecimal rating;
-    private String previewPhotoUrl;
+    @NotBlank
+    @Email
+    private String ownerEmail;
+    @NotBlank
     private String contactPhone;
-    private String status;
+    private String workingHours;
+    @Valid
     private AddressDto address;
 }
