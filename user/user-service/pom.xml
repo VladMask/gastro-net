@@ -90,26 +90,6 @@
             <artifactId>opentelemetry-exporter-otlp</artifactId>
             <version>1.49.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.javacrumbs.shedlock</groupId>
-            <artifactId>shedlock-spring</artifactId>
-            <version>6.9.2</version>
-        </dependency>
-        <dependency>
-            <groupId>net.javacrumbs.shedlock</groupId>
-            <artifactId>shedlock-provider-jdbc-template</artifactId>
-            <version>6.9.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka-test</artifactId>
-            <version>3.3.9</version>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>grsu.by</groupId>
@@ -120,12 +100,6 @@
         <dependency>
             <groupId>grsu.by</groupId>
             <artifactId>exception</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>grsu.by</groupId>
-            <artifactId>outbox</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

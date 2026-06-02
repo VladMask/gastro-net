@@ -5,6 +5,7 @@ import grsu.by.dto.EmailResponse;
 import grsu.by.dto.UserCreationDto;
 import grsu.by.dto.UserFullDto;
 import grsu.by.dto.UserShortDto;
+import grsu.by.dto.UserUpdateDto;
 import grsu.by.entity.OutboxEvent;
 import grsu.by.entity.User;
 import grsu.by.repository.UserRepository;
@@ -67,6 +68,17 @@ public class UserServiceImpl implements UserService {
                 () -> new EntityNotFoundException("User not found")
         );
         return mapper.map(user, UserFullDto.class);
+    }
+
+    @Transactional
+    public UserFullDto updateMe(String email, UserUpdateDto dto) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        if (dto.getFirstname() != null) user.setFirstname(dto.getFirstname());
+        if (dto.getLastname() != null) user.setLastname(dto.getLastname());
+        if (dto.getPhoneNumber() != null) user.setPhoneNumber(dto.getPhoneNumber());
+        if (dto.getBirthDate() != null) user.setBirthDate(dto.getBirthDate());
+        return mapper.map(userRepository.save(user), UserFullDto.class);
     }
 
 }
