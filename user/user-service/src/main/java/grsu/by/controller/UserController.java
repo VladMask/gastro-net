@@ -9,6 +9,7 @@ import grsu.by.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,6 +33,13 @@ public class UserController {
     public Long create(@RequestBody UserCreationDto creationDto) {
         log.info("Create request received");
         return service.create(creationDto);
+    }
+
+    @GetMapping("/email")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
+    public UserFullDto findByEmail(@RequestParam String email) {
+        return service.findByEmail(email);
     }
 
     @GetMapping("/{id}")

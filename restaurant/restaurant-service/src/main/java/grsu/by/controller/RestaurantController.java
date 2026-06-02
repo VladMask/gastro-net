@@ -129,7 +129,6 @@ public class RestaurantController {
         );
     }
 
-
     @GetMapping("/my")
     @PreAuthorize("hasRole('RESTAURANT_ADMIN')")
     public List<RestaurantShortDto> getMyRestaurants(

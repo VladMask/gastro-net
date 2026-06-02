@@ -53,7 +53,11 @@ public class RestaurantServiceImpl implements RestaurantService {
         Restaurant restaurant = restaurantRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Restaurant not found")
         );
+
+        String existingPhotoUrl = restaurant.getPreviewPhotoUrl();
         mapper.map(updateDto, restaurant);
+        restaurant.setPreviewPhotoUrl(existingPhotoUrl);
+
         return mapper.map(restaurantRepository.save(restaurant), RestaurantShortDto.class);
     }
 
