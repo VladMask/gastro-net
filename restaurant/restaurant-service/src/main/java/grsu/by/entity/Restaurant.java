@@ -44,7 +44,7 @@ public class Restaurant {
     private String workingHours;
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private RestaurantStatus status;
+    private RestaurantStatus status = RestaurantStatus.PENDING_ACTIVATION;
     @Column(name = "owner_email")
     private String ownerEmail;
     @Embedded

@@ -30,7 +30,6 @@ public class ReviewController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("isAuthenticated()")
     public ReviewFullDto create(@RequestBody @Valid ReviewCreationDto creationDto,
                                 @RequestHeader("X-Auth-Login") String login) {
         log.info("Create review for restaurant {}", creationDto.getRestaurantId());
@@ -47,7 +46,7 @@ public class ReviewController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
+    @PreAuthorize("hasRole('PLATFORM_ADMIN') and @restaurantSecurity.isReviewAuthor(id)")
     public void delete(@PathVariable Long id) {
         log.info("Delete review {}", id);
         service.delete(id);

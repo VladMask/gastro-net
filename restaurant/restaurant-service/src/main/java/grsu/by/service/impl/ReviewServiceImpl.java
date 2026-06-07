@@ -18,6 +18,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
+
     private final ReviewRepository reviewRepository;
     private final RestaurantRepository restaurantRepository;
     private final ModelMapper mapper;
@@ -26,11 +27,12 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public ReviewFullDto create(ReviewCreationDto creationDto) {
         Review review = mapper.map(creationDto, Review.class);
-        Restaurant restaurant = restaurantRepository.findById(creationDto.getRestaurantId()).orElseThrow(
-                () -> new EntityNotFoundException("Restaurant not found")
-        );
+        Restaurant restaurant = restaurantRepository.findById(creationDto.getRestaurantId())
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found"));
         review.setRestaurant(restaurant);
-        return mapper.map(reviewRepository.save(review), ReviewFullDto.class);
+        Review saved = reviewRepository.save(review);
+        recalculateRating(restaurant);
+        return mapper.map(saved, ReviewFullDto.class);
     }
 
     @Override
@@ -43,9 +45,20 @@ public class ReviewServiceImpl implements ReviewService {
     @Transactional
     @Override
     public void delete(Long id) {
-        if (!reviewRepository.existsById(id)) {
-            throw new EntityNotFoundException("Review not found");
-        }
-        reviewRepository.deleteById(id);
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Review not found"));
+        Restaurant restaurant = review.getRestaurant();
+        reviewRepository.delete(review);
+        recalculateRating(restaurant);
+    }
+
+    private void recalculateRating(Restaurant restaurant) {
+        List<Review> reviews = reviewRepository.findByRestaurantId(restaurant.getId());
+        double avg = reviews.stream()
+                .mapToInt(Review::getRating)
+                .average()
+                .orElse(0.0);
+        restaurant.setRating(java.math.BigDecimal.valueOf(avg));
+        restaurantRepository.save(restaurant);
     }
 }
