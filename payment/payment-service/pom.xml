@@ -79,6 +79,12 @@
             <version>1.49.0</version>
         </dependency>
         <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>32.0.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
@@ -91,11 +97,6 @@
             <groupId>net.javacrumbs.shedlock</groupId>
             <artifactId>shedlock-provider-jdbc-template</artifactId>
             <version>6.9.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.stripe</groupId>
-            <artifactId>stripe-java</artifactId>
-            <version>32.0.0</version>
         </dependency>
 
         <dependency>
@@ -124,13 +125,13 @@
         </dependency>
         <dependency>
             <groupId>grsu.by</groupId>
-            <artifactId>outbox</artifactId>
+            <artifactId>model-mapper-autoconfig</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>grsu.by</groupId>
-            <artifactId>model-mapper-autoconfig</artifactId>
+            <artifactId>outbox</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
