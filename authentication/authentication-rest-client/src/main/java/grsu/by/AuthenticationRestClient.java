@@ -15,10 +15,12 @@ import java.util.Objects;
 @Getter
 @Setter
 public class AuthenticationRestClient {
+
     private final AuthenticationRestClientProperties restClientProperties;
     private final RestClient restClient;
 
-    public AuthenticationRestClient(AuthenticationRestClientProperties restClientProperties, RestClient.Builder restClientBuilder) {
+    public AuthenticationRestClient(AuthenticationRestClientProperties restClientProperties,
+                                    RestClient.Builder restClientBuilder) {
         this.restClientProperties = restClientProperties;
         this.restClient = restClientBuilder
                 .baseUrl(restClientProperties.getBaseUrl())
@@ -27,18 +29,35 @@ public class AuthenticationRestClient {
     }
 
     public void assignRole(Long profileId, String roleName) {
-        HttpServletRequest incoming = ((ServletRequestAttributes)
-                Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
-
+        HttpServletRequest incoming = getIncomingRequest();
         restClient.post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/api/v1/authentication/internal/profiles/{profileId}/roles")
-                        .queryParam("roleName", roleName)
-                        .build(profileId))
-                .header("X-Auth-Login",      incoming.getHeader("X-Auth-Login"))
-                .header("X-Auth-Profile-Id", incoming.getHeader("X-Auth-Profile-Id"))
-                .header("X-Auth-Roles",      incoming.getHeader("X-Auth-Roles"))
-                .retrieve()
-                .toBodilessEntity();
+            .uri(uriBuilder -> uriBuilder
+                .path("/api/v1/authentication/internal/profiles/{profileId}/roles")
+                .queryParam("roleName", roleName)
+                .build(profileId))
+            .header("X-Auth-Login", incoming.getHeader("X-Auth-Login"))
+            .header("X-Auth-Profile-Id", incoming.getHeader("X-Auth-Profile-Id"))
+            .header("X-Auth-Roles", incoming.getHeader("X-Auth-Roles"))
+            .retrieve()
+            .toBodilessEntity();
+    }
+
+    public void setLocked(Long profileId, boolean locked) {
+        HttpServletRequest incoming = getIncomingRequest();
+        restClient.patch()
+            .uri(uriBuilder -> uriBuilder
+                .path("/api/v1/authentication/internal/profiles/{profileId}/lock")
+                .queryParam("locked", locked)
+                .build(profileId))
+            .header("X-Auth-Login", incoming.getHeader("X-Auth-Login"))
+            .header("X-Auth-Profile-Id", incoming.getHeader("X-Auth-Profile-Id"))
+            .header("X-Auth-Roles", incoming.getHeader("X-Auth-Roles"))
+            .retrieve()
+            .toBodilessEntity();
+    }
+
+    private HttpServletRequest getIncomingRequest() {
+        return ((ServletRequestAttributes) Objects.requireNonNull(
+            RequestContextHolder.getRequestAttributes())).getRequest();
     }
 }
