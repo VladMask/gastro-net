@@ -16,11 +16,26 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   liquibase:
     change-log: classpath:reservation-service-db/changelog.xml
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 rest:
   client:
     restaurant-service:
       base-url: ${RESTAURANT_SERVICE_URL}
+
+common:
+  outbox:
+    producer:
+      kafka-topic: reservations
+    scheduler:
+      lock-at-most-for: 2m
+      initial-delay: 10000
+      fixed-delay: 5000
+      enabled: true
 
 exception:
   dto-factory:

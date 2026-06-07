@@ -25,4 +25,12 @@
         <sqlFile encoding="utf8" path="sql/05.add-cascade-delete-on-reservation-tables.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
+    <changeSet id="06.create-outbox_events-table" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/06.create-outbox_events-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="07.create-shedlock-table" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/07.create-shedlock-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
 </databaseChangeLog>

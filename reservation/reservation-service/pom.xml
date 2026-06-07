@@ -82,6 +82,26 @@
             <artifactId>opentelemetry-exporter-otlp</artifactId>
             <version>1.49.0</version>
         </dependency>
+        <dependency>
+            <groupId>grsu.by</groupId>
+            <artifactId>outbox</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-spring</artifactId>
+            <version>6.9.2</version>
+        </dependency>
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-provider-jdbc-template</artifactId>
+            <version>6.9.2</version>
+        </dependency>
 
         <dependency>
             <groupId>grsu.by</groupId>
@@ -104,6 +124,12 @@
         <dependency>
             <groupId>grsu.by</groupId>
             <artifactId>restaurant-rest-client</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>grsu.by</groupId>
+            <artifactId>outbox</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

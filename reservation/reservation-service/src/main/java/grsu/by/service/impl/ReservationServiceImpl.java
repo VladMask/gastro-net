@@ -1,7 +1,10 @@
 package grsu.by.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import grsu.by.dto.reservationDto.ReservationCreationDto;
 import grsu.by.dto.reservationDto.ReservationFullDto;
+import grsu.by.entity.OutboxEvent;
 import grsu.by.entity.Reservation;
 import grsu.by.entity.RestaurantTable;
 import grsu.by.enums.ReservationStatus;
@@ -9,6 +12,7 @@ import grsu.by.enums.RestaurantTableStatus;
 import grsu.by.repository.ReservationRepository;
 import grsu.by.repository.RestaurantTableRepository;
 import grsu.by.security.ReservationSecurity;
+import grsu.by.service.OutboxEventService;
 import grsu.by.service.ReservationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +35,8 @@ public class ReservationServiceImpl implements ReservationService {
     private final RestaurantTableRepository restaurantTableRepository;
     private final ModelMapper mapper;
     private final ReservationSecurity reservationSecurity;
+    private final OutboxEventService outboxEventService;
+    private final ObjectMapper objectMapper;
 
     @Transactional
     @Override
@@ -54,7 +60,11 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setRestaurantTables(tables);
         reservation.setStatus(ReservationStatus.CREATED);
         tables.forEach(table -> table.setStatus(RestaurantTableStatus.RESERVED));
-        return mapper.map(reservationRepository.save(reservation), ReservationFullDto.class);
+        Reservation saved = reservationRepository.save(reservation);
+
+        produceEvent(saved, "reservation.created");
+
+        return mapper.map(saved, ReservationFullDto.class);
     }
 
     @Override
@@ -74,7 +84,8 @@ public class ReservationServiceImpl implements ReservationService {
             throw new IllegalStateException("Only CREATED reservations can be confirmed");
         }
         reservation.setStatus(ReservationStatus.CONFIRMED);
-        reservationRepository.save(reservation);
+        Reservation saved = reservationRepository.save(reservation);
+        produceEvent(saved, "reservation.confirmed");
     }
 
     @Transactional
@@ -86,10 +97,19 @@ public class ReservationServiceImpl implements ReservationService {
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
             throw new IllegalStateException("Reservation is already cancelled");
         }
+        boolean isAdmin = reservationSecurity.isAdminOfRestaurant(reservation.getRestaurantId());
+        if (!isAdmin) {
+            Instant twoHoursBefore = reservation.getReservedAt().minus(2, ChronoUnit.HOURS);
+            if (Instant.now().isAfter(twoHoursBefore)) {
+                throw new IllegalStateException(
+                        "Cannot cancel reservation less than 2 hours before start time");
+            }
+        }
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservation.getRestaurantTables()
                 .forEach(table -> table.setStatus(RestaurantTableStatus.AVAILABLE));
-        reservationRepository.save(reservation);
+        Reservation saved = reservationRepository.save(reservation);
+        produceEvent(saved, "reservation.cancelled");
     }
 
     @Override
@@ -149,6 +169,17 @@ public class ReservationServiceImpl implements ReservationService {
                 .anyMatch(t -> t.getStatus() == RestaurantTableStatus.UNAVAILABLE);
         if (anyUnavailable) {
             throw new IllegalArgumentException("One or more selected tables are unavailable");
+        }
+    }
+
+    private void produceEvent(Reservation reservation, String header) {
+        try {
+            outboxEventService.create(new OutboxEvent(
+                    header,
+                    objectMapper.writeValueAsString(reservation))
+            );
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 }
