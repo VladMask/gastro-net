@@ -7,6 +7,8 @@ import grsu.by.dto.mealDto.MealFullDto;
 import grsu.by.service.MealService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,8 +24,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/meals")
@@ -53,8 +53,12 @@ public class MealController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<MealFullDto> findByRestaurantId(@RequestParam Long restaurantId) {
-        return service.findByRestaurantId(restaurantId);
+    public Page<MealFullDto> findByRestaurantId(
+            @RequestParam Long restaurantId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return service.findByRestaurantId(restaurantId, PageRequest.of(page, size));
     }
 
     @PutMapping("/{id}")

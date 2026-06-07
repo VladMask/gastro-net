@@ -14,12 +14,12 @@ import grsu.by.service.StorageService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -58,10 +58,9 @@ public class MealServiceImpl implements MealService {
     }
 
     @Override
-    public List<MealFullDto> findByRestaurantId(Long restaurantId) {
-        return mealRepository.findByRestaurantId(restaurantId).stream()
-                .map(this::toDto)
-                .toList();
+    public Page<MealFullDto> findByRestaurantId(Long restaurantId, Pageable pageable) {
+        return mealRepository.findByRestaurantId(restaurantId, pageable)
+                .map(this::toDto);
     }
 
     @Transactional
