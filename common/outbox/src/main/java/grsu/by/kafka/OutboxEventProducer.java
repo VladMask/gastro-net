@@ -26,10 +26,10 @@ public class OutboxEventProducer {
     private final OutboxEventService outboxEventService;
 
     @Transactional
-    public void sendUserCreatedEvents() {
+    public void sendCreatedEvents() {
         List<OutboxEvent> events = outboxEventService.findByStatusOrderByCreatedAt(EventStatus.NEW, Limit.of(10));
         List<CompletableFuture<SendResult<String, String>>> futures  = new ArrayList<>();
-        events.forEach(event -> futures.add(sendUserCreatedEvent(event)));
+        events.forEach(event -> futures.add(sendCreatedEvent(event)));
         try {
             futures.forEach(CompletableFuture::join);
         } catch (CompletionException | CancellationException e) {
@@ -38,7 +38,7 @@ public class OutboxEventProducer {
         outboxEventService.saveAll(events);
     }
 
-    private CompletableFuture<SendResult<String, String>> sendUserCreatedEvent(OutboxEvent event) {
+    private CompletableFuture<SendResult<String, String>> sendCreatedEvent(OutboxEvent event) {
         return kafkaTemplate.send(properties.getKafkaTopic(), event.getHeader(), event.getPayload())
                 .whenComplete((r, e) -> {
                         if (e == null) {

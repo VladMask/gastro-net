@@ -16,17 +16,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   liquibase:
     change-log: classpath:notification-service-db/changelog.xml
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
@@ -37,16 +27,12 @@ spring:
 
 notification-service:
   consumer:
-    kafka-topic: payments
+    kafka-topic: payments,reservations
   scheduler:
     enabled: true
     fixed-delay: 10000
     initial-delay: 15000
     lock-at-most-for: 2m
-  verification-code:
-    expiration-time-seconds: 90
-  code-hasher:
-    otp-secret: ${OTP_SECRET}
 
 rest:
   client:

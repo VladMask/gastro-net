@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
@@ -20,19 +21,31 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "verification_codes")
-public class VerificationCode {
+@Table(name = "notifications")
+public class Notification {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    @Column(name = "receiver_email")
-    private String receiverEmail;
-    @Column(name = "code_hash")
-    private String codeHash;
+
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
+    @Column(name = "title", nullable = false)
+    private String title;
+
+    @Column(name = "body", nullable = false, columnDefinition = "TEXT")
+    private String body;
+
+    @Column(name = "type")
+    private String type;
+
+    @Column(name = "read", nullable = false)
+    @Builder.Default
+    private boolean read = false;
+
+    @CreationTimestamp
     @Column(name = "created_at")
     private Instant createdAt;
-    @Column(name = "expires_at")
-    private Instant expiresAt;
-
 }
