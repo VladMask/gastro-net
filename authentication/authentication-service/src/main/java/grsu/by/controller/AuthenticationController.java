@@ -14,6 +14,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Duration;
 
-
 @RestController
 @RequestMapping("/api/v1/authentication")
 @RequiredArgsConstructor
@@ -35,39 +35,28 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
-    public void login(
-            @RequestBody @Valid AuthenticationRequest request,
-            HttpServletResponse response
-    ) {
+    public void login(@RequestBody @Valid AuthenticationRequest request, HttpServletResponse response) {
         AuthenticationResponse tokens = authService.login(request);
         addTokenCookies(response, tokens);
     }
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.OK)
-    public void register(
-            @RequestBody @Valid RegistrationRequest request,
-            HttpServletResponse response
-    ) {
+    public void register(@RequestBody @Valid RegistrationRequest request, HttpServletResponse response) {
         AuthenticationResponse tokens = authService.register(request);
         addTokenCookies(response, tokens);
     }
 
     @PostMapping("/refresh")
     @ResponseStatus(HttpStatus.OK)
-    public void refresh(
-            @CookieValue(name = "refresh_token") String refreshToken,
-            HttpServletResponse response
-    ) {
+    public void refresh(@CookieValue(name = "refresh_token") String refreshToken, HttpServletResponse response) {
         AuthenticationResponse tokens = authService.refreshTokens(refreshToken);
         addTokenCookies(response, tokens);
     }
 
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.OK)
-    public void logout(
-            @CookieValue(name = "refresh_token") String refreshToken,
-            HttpServletResponse response) {
+    public void logout(@CookieValue(name = "refresh_token") String refreshToken, HttpServletResponse response) {
         authService.logout(refreshToken);
         clearTokenCookies(response);
     }
@@ -77,6 +66,13 @@ public class AuthenticationController {
     @ResponseStatus(HttpStatus.OK)
     public void assignRole(@PathVariable Long profileId, @RequestParam String roleName) {
         authService.assignRole(profileId, roleName);
+    }
+
+    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
+    @PatchMapping("/internal/profiles/{profileId}/lock")
+    @ResponseStatus(HttpStatus.OK)
+    public void setLocked(@PathVariable Long profileId, @RequestParam boolean locked) {
+        authService.setLocked(profileId, locked);
     }
 
     @GetMapping("/me/roles")

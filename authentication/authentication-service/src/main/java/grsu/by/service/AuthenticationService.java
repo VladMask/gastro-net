@@ -12,4 +12,5 @@ public interface AuthenticationService {
     void logout(String refreshToken);
     void assignRole(Long profileId, String roleName);
     RolesResponseDto getMyRoles(String email);
+    void setLocked(Long profileId, boolean locked);
 }

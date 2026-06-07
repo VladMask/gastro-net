@@ -27,6 +27,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
+
     private final ProfileRepository profileRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
@@ -39,14 +40,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @SneakyThrows
     @Override
     public AuthenticationResponse login(AuthenticationRequest request) {
-        Profile profile = profileRepository.findByEmail(request.getEmail()).orElseThrow(
-                () -> new EntityNotFoundException("Profile not found")
-        );
+        Profile profile = profileRepository.findByEmail(request.getEmail())
+            .orElseThrow(() -> new EntityNotFoundException("Profile not found"));
+
+        if (profile.isLocked()) {
+            throw new AuthenticationException("Account is blocked");
+        }
 
         if (!passwordEncoder.matches(request.getPassword(), profile.getPasswordHash())) {
             throw new AuthenticationException("Wrong login or password");
         }
-
         return getTokenPair(request.getEmail());
     }
 
@@ -67,7 +70,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new IllegalStateException("Failed to create user profile", ex);
         }
         Profile profile = createProfile(request);
-
         return getTokenPair(profile.getEmail());
     }
 
@@ -75,11 +77,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public AuthenticationResponse refreshTokens(String refreshToken) {
         RefreshToken refreshedToken = refreshTokenService.refreshToken(refreshToken);
-        Profile profile = profileRepository.findById(refreshedToken.getProfileId()).orElseThrow(
-                () -> new EntityNotFoundException("Profile not found")
-        );
-        String accessToken = generateAccessToken(profile.getEmail());
+        Profile profile = profileRepository.findById(refreshedToken.getProfileId())
+            .orElseThrow(() -> new EntityNotFoundException("Profile not found"));
 
+        if (profile.isLocked()) {
+            throw new IllegalStateException("Account is blocked");
+        }
+
+        String accessToken = generateAccessToken(profile.getEmail());
         refreshTokenService.deleteByToken(refreshToken);
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
@@ -119,6 +124,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .toList();
 
         return new RolesResponseDto(roles);
+    }
+
+    @Transactional
+    @Override
+    public void setLocked(Long profileId, boolean locked) {
+        Profile profile = profileRepository.findById(profileId)
+            .orElseThrow(() -> new EntityNotFoundException("Profile not found"));
+        profile.setLocked(locked);
+        profileRepository.save(profile);
     }
 
     private Profile createProfile(RegistrationRequest request) {

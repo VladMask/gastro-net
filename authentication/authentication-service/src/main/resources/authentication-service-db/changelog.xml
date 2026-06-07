@@ -3,7 +3,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
     <changeSet id="01.create-profiles-table" author="Vladislav Maskevich">
         <sqlFile encoding="utf8" path="./sql/01.create-profiles-table.sql" relativeToChangelogFile="true"/>
@@ -21,8 +21,8 @@
         <sqlFile encoding="utf8" path="sql/04.create-profile_roles-table.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
-    <changeSet id="05.create-refresh_tokens-table" author="Vladislav Maskevich">
-        <sqlFile encoding="utf8" path="sql/05.create-refresh_tokens-table.sql" relativeToChangelogFile="true"/>
+    <changeSet id="06.add-locked-field-to-profiles-table" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/06.add-locked-field-to-profiles-table.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
 </databaseChangeLog>

@@ -39,6 +39,9 @@ public class Profile {
     private String email;
     @Column(name = "password_hash")
     private String passwordHash;
+    @Column(name = "locked")
+    @Builder.Default
+    private boolean locked = false;
     @Column(name = "created_at")
     @CreationTimestamp
     private Instant createdAt;
