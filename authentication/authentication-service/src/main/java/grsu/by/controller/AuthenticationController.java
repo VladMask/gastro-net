@@ -8,6 +8,7 @@ import grsu.by.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -30,6 +31,10 @@ import java.time.Duration;
 @RequestMapping("/api/v1/authentication")
 @RequiredArgsConstructor
 public class AuthenticationController {
+
+    @Value("${authentication.cookie.secure:false}")
+    private boolean cookieSecure;
+    private final String SAME_SITE = "Lax";
 
     private final AuthenticationService authService;
 
@@ -84,16 +89,16 @@ public class AuthenticationController {
     private void addTokenCookies(HttpServletResponse response, AuthenticationResponse tokens) {
         ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
                 .httpOnly(true)
-                .secure(false)
-                .sameSite("Strict")
+                .secure(cookieSecure)
+                .sameSite(SAME_SITE)
                 .path("/")
                 .maxAge(Duration.ofMinutes(15))
                 .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokens.getRefreshToken())
                 .httpOnly(true)
-                .secure(false)
-                .sameSite("Strict")
+                .secure(cookieSecure)
+                .sameSite(SAME_SITE)
                 .path("/")
                 .maxAge(Duration.ofDays(7))
                 .build();

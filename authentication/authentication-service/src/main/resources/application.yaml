@@ -6,9 +6,9 @@ spring:
     name: authentication-service
 
   datasource:
-    url: ${AUTH_DB_URL}
-    username: ${AUTH_DB_USERNAME}
-    password: ${AUTH_DB_PASSWORD}
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -43,8 +43,10 @@ authentication:
     access-token-expiration-time: ${JWT_ACCESS_TOKEN_EXPIRATION:600000}
   refresh-token-service:
     refresh-token-expiration-time: ${JWT_REFRESH_TOKEN_EXPIRATION:86400000}
+  cookie:
+    secure: ${COOKIE_SECURE:false}
 
 rest:
   client:
     user-service:
-      base-url: http://localhost:8081
+      base-url: ${USER_SERVICE_URL:http://localhost:8081}

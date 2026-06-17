@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -115,14 +116,16 @@ public class MinioStorageServiceImpl implements StorageService {
     }
 
     private String buildPublicUrl(String objectKey) {
-        return properties.getEndpoint() + "/" + properties.getBucket() + "/" + objectKey;
+        return properties.getPublicEndpoint() + "/" + properties.getBucket() + "/" + objectKey;
     }
 
 
     private String extractObjectKey(String url) {
-        String prefix = properties.getEndpoint() + "/" + properties.getBucket() + "/";
-        if (url.startsWith(prefix)) {
-            return url.substring(prefix.length());
+        for (String base : List.of(properties.getPublicEndpoint(), properties.getEndpoint())) {
+            String prefix = base + "/" + properties.getBucket() + "/";
+            if (url.startsWith(prefix)) {
+                return url.substring(prefix.length());
+            }
         }
         return url;
     }
