@@ -46,7 +46,7 @@ public class ReviewController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('PLATFORM_ADMIN') and @restaurantSecurity.isReviewAuthor(id)")
+    @PreAuthorize("hasRole('PLATFORM_ADMIN') and @restaurantSecurity.isReviewAuthor()")
     public void delete(@PathVariable Long id) {
         log.info("Delete review {}", id);
         service.delete(id);

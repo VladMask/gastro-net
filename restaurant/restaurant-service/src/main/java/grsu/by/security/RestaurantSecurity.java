@@ -22,7 +22,7 @@ public class RestaurantSecurity {
         return restaurantAdminRepository.existsByProfileIdAndRestaurantId(profileId, restaurantId);
     }
 
-    public boolean isReviewAuthor(Long reviewId) {
+    public boolean isReviewAuthor() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !(auth.getPrincipal() instanceof ProfilePrincipal principal)) {
             throw new RuntimeException();
