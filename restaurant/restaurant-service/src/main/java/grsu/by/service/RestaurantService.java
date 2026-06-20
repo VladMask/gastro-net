@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface RestaurantService {
     RestaurantShortDto create(RestaurantCreationDto creationDto, MultipartFile photo);
@@ -24,4 +25,5 @@ public interface RestaurantService {
     Page<RestaurantFullDto> findByStatus(RestaurantStatus status, Pageable pageable);
     RestaurantFullDto approveApplication(Long restaurantId);
     RestaurantFullDto rejectApplication(Long restaurantId);
+    Page<RestaurantFullDto> findByStatuses(List<RestaurantStatus> statuses, Pageable pageable);
 }

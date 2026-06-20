@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum RestaurantStatus {
     PENDING_ACTIVATION("PENDING_ACTIVATION"),
     ACTIVE("ACTIVE"),
-    INACTIVE("INACTIVE");
+    INACTIVE("INACTIVE"),
+    REJECTED("REJECTED");
 
     private final String name;
 

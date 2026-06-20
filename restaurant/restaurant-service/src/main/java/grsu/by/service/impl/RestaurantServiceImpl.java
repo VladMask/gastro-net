@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -151,6 +152,12 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .orElseThrow(() -> new EntityNotFoundException("Restaurant not found"));
         restaurant.setStatus(RestaurantStatus.INACTIVE);
         return mapper.map(restaurantRepository.save(restaurant), RestaurantFullDto.class);
+    }
+
+    @Override
+    public Page<RestaurantFullDto> findByStatuses(List<RestaurantStatus> statuses, Pageable pageable) {
+        return restaurantRepository.findByStatusIn(statuses, pageable)
+                .map(r -> mapper.map(r, RestaurantFullDto.class));
     }
 
     public Page<RestaurantFullDto> findByStatus(RestaurantStatus status, Pageable pageable) {

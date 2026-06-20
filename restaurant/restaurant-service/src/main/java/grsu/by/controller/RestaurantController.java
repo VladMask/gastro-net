@@ -162,6 +162,20 @@ public class RestaurantController {
         return restaurantService.rejectApplication(id);
     }
 
+    @GetMapping("/applications")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
+    public Page<RestaurantFullDto> findAllApplications(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return restaurantService.findByStatuses(
+                List.of(RestaurantStatus.PENDING_ACTIVATION,
+                        RestaurantStatus.ACTIVE,
+                        RestaurantStatus.REJECTED),
+                PageRequest.of(page, size, Sort.by("id").descending())
+        );
+    }
+
     @GetMapping("/pending")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('PLATFORM_ADMIN')")
