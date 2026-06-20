@@ -2,6 +2,7 @@ package grsu.by.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import grsu.by.dto.reservationDto.AvailableSlotDto;
 import grsu.by.dto.reservationDto.ReservationCreationDto;
 import grsu.by.dto.reservationDto.ReservationFullDto;
 import grsu.by.entity.OutboxEvent;
@@ -24,7 +25,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -138,6 +143,36 @@ public class ReservationServiceImpl implements ReservationService {
         reservationRepository.saveAll(toExpire);
     }
 
+    @Override
+    public List<AvailableSlotDto> getAvailableSlots(Long restaurantId, List<Long> tableIds, LocalDate date) {
+        LocalTime openTime = LocalTime.of(8, 0);
+        LocalTime closeTime = LocalTime.of(20, 0);
+        int slotMinutes = 30;
+        int durationHours = 2;
+
+        List<AvailableSlotDto> result = new ArrayList<>();
+        LocalTime current = openTime;
+
+        while (!current.plusHours(durationHours).isAfter(closeTime)) {
+            Instant slotStart = date.atTime(current).toInstant(ZoneOffset.UTC);
+            Instant slotEnd = date.atTime(current.plusHours(durationHours)).toInstant(ZoneOffset.UTC);
+
+            boolean hasOverlap = !tableIds.isEmpty() && reservationRepository.existsOverlappingReservation(tableIds, slotStart, slotEnd);
+
+            if (!hasOverlap) {
+                result.add(new AvailableSlotDto(slotStart, slotEnd));
+            }
+            current = current.plusMinutes(slotMinutes);
+        }
+        return result;
+    }
+
+    @Override
+    public Page<ReservationFullDto> findByRestaurantIdWithFilters(Long restaurantId, Instant dateFrom, Instant dateTo, Pageable pageable) {
+        return reservationRepository
+                .findByRestaurantIdWithFilters(restaurantId, dateFrom, dateTo, pageable)
+                .map(r -> mapper.map(r, ReservationFullDto.class));
+    }
 
     private void checkAdminOf(Long restaurantId) {
         if (!reservationSecurity.isAdminOfRestaurant(restaurantId)) {

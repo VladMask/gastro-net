@@ -27,6 +27,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("reservedUntil") Instant reservedUntil
     );
 
+    @Query("""
+        select r from Reservation r
+        where r.restaurantId = :restaurantId
+          and (:dateFrom is null or r.reservedAt >= :dateFrom)
+          and (:dateTo is null or r.reservedAt < :dateTo)
+        order by r.reservedAt desc
+    """)
+    Page<Reservation> findByRestaurantIdWithFilters(
+            @Param("restaurantId") Long restaurantId,
+            @Param("dateFrom") Instant dateFrom,
+            @Param("dateTo") Instant dateTo,
+            Pageable pageable
+    );
+
     Page<Reservation> findByUserId(Long userId, Pageable pageable);
 
     Page<Reservation> findByRestaurantId(Long restaurantId, Pageable pageable);

@@ -1,5 +1,6 @@
 package grsu.by.controller;
 
+import grsu.by.dto.reservationDto.AvailableSlotDto;
 import grsu.by.dto.reservationDto.ReservationCreationDto;
 import grsu.by.dto.reservationDto.ReservationFullDto;
 import grsu.by.service.ReservationService;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +24,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/reservations")
@@ -32,7 +39,6 @@ public class ReservationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("isAuthenticated()")
     public ReservationFullDto create(@RequestBody @Valid ReservationCreationDto creationDto) {
         log.info("Create reservation request received");
         return service.create(creationDto);
@@ -40,7 +46,6 @@ public class ReservationController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("isAuthenticated()")
     public ReservationFullDto findById(@PathVariable Long id) {
         log.info("Find Reservation by id {}", id);
         return service.findById(id);
@@ -55,14 +60,12 @@ public class ReservationController {
 
     @PatchMapping("/{id}/cancel")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("isAuthenticated()")
     public void cancelReservationById(@PathVariable Long id) {
         service.cancelReservationById(id);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("isAuthenticated()")
     public Page<ReservationFullDto> findByUserId(
             @RequestParam Long userId,
             @RequestParam(defaultValue = "0") int page,
@@ -79,10 +82,22 @@ public class ReservationController {
     public Page<ReservationFullDto> findByRestaurantId(
             @PathVariable Long restaurantId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo
     ) {
-        log.info("Find reservations for restaurant {}", restaurantId);
+        Instant from = dateFrom != null ? dateFrom.atStartOfDay(ZoneOffset.UTC).toInstant() : null;
+        Instant to   = dateTo   != null ? dateTo.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant() : null;
         Pageable pageable = PageRequest.of(page, size, Sort.by("reservedAt").descending());
-        return service.findByRestaurantId(restaurantId, pageable);
+        return service.findByRestaurantIdWithFilters(restaurantId, from, to, pageable);
+    }
+
+    @GetMapping("/available-slots")
+    @ResponseStatus(HttpStatus.OK)
+    public List<AvailableSlotDto> getAvailableSlots(
+            @RequestParam Long restaurantId,
+            @RequestParam List<Long> tableIds,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return service.getAvailableSlots(restaurantId, tableIds, date);
     }
 }
