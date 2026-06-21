@@ -16,5 +16,4 @@ public class RestaurantTableFullDto {
     private Long restaurantId;
     private String number;
     private Short capacity;
-    private String status;
 }

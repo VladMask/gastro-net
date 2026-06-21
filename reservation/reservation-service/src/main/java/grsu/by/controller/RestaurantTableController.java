@@ -2,7 +2,6 @@ package grsu.by.controller;
 
 import grsu.by.dto.restaurantTableDto.RestaurantTableCreationDto;
 import grsu.by.dto.restaurantTableDto.RestaurantTableFullDto;
-import grsu.by.enums.RestaurantTableStatus;
 import grsu.by.service.RestaurantTableService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,19 +55,8 @@ public class RestaurantTableController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<RestaurantTableFullDto> findByRestaurantId(
-            @RequestParam Long restaurantId,
-            @RequestParam(required = false) RestaurantTableStatus status) {
-        if (status != null) return service.findByRestaurantIdAndStatus(restaurantId, status);
+            @RequestParam Long restaurantId) {
         return service.findByRestaurantId(restaurantId);
-    }
-
-    @PatchMapping("/{id}/status")
-    @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('PLATFORM_ADMIN') or hasRole('RESTAURANT_ADMIN')")
-    public RestaurantTableFullDto updateStatus(
-            @PathVariable Long id,
-            @RequestParam RestaurantTableStatus status) {
-        return service.updateStatus(id, status);
     }
 
     @DeleteMapping("/{id}")

@@ -92,7 +92,7 @@ public class RestaurantController {
             @RequestParam(defaultValue = "10") Integer size
     ) {
         return restaurantService.findActive(
-                PageRequest.of(page, size, Sort.by("id").descending())
+                PageRequest.of(page, size, Sort.by("id").ascending())
         );
     }
 

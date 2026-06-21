@@ -33,4 +33,8 @@
         <sqlFile encoding="utf8" path="sql/07.create-shedlock-table.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
+    <changeSet id="08.delete-status-column-from-restaurant_tables" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/08.delete-status-column-from-restaurant_tables.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
 </databaseChangeLog>

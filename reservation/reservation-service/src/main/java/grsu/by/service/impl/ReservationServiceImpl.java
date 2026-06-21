@@ -9,7 +9,6 @@ import grsu.by.entity.OutboxEvent;
 import grsu.by.entity.Reservation;
 import grsu.by.entity.RestaurantTable;
 import grsu.by.enums.ReservationStatus;
-import grsu.by.enums.RestaurantTableStatus;
 import grsu.by.repository.ReservationRepository;
 import grsu.by.repository.RestaurantTableRepository;
 import grsu.by.security.ReservationSecurity;
@@ -65,7 +64,6 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setReservedUntil(reservedUntil);
         reservation.setRestaurantTables(tables);
         reservation.setStatus(ReservationStatus.CREATED);
-        tables.forEach(table -> table.setStatus(RestaurantTableStatus.RESERVED));
         Reservation saved = reservationRepository.save(reservation);
 
         produceEvent(saved, "reservation.created");
@@ -112,8 +110,6 @@ public class ReservationServiceImpl implements ReservationService {
             }
         }
         reservation.setStatus(ReservationStatus.CANCELLED);
-        reservation.getRestaurantTables()
-                .forEach(table -> table.setStatus(RestaurantTableStatus.AVAILABLE));
         Reservation saved = reservationRepository.save(reservation);
         produceEvent(saved, "reservation.cancelled");
     }
@@ -137,10 +133,7 @@ public class ReservationServiceImpl implements ReservationService {
                 .findByStatusAndReservedUntilBefore(ReservationStatus.CREATED, Instant.now());
         toExpire.addAll(reservationRepository
                 .findByStatusAndReservedUntilBefore(ReservationStatus.CONFIRMED, Instant.now()));
-        toExpire.forEach(r -> {
-            r.setStatus(ReservationStatus.EXPIRED);
-            r.getRestaurantTables().forEach(t -> t.setStatus(RestaurantTableStatus.AVAILABLE));
-        });
+        toExpire.forEach(r -> r.setStatus(ReservationStatus.EXPIRED));
         reservationRepository.saveAll(toExpire);
     }
 
@@ -202,11 +195,6 @@ public class ReservationServiceImpl implements ReservationService {
                 .mapToInt(RestaurantTable::getCapacity).sum()) {
             throw new IllegalArgumentException(
                     "Guests count cannot be greater than tables capacity");
-        }
-        boolean anyUnavailable = tables.stream()
-                .anyMatch(t -> t.getStatus() == RestaurantTableStatus.UNAVAILABLE);
-        if (anyUnavailable) {
-            throw new IllegalArgumentException("One or more selected tables are unavailable");
         }
     }
 
