@@ -19,8 +19,10 @@ public class RestaurantCreationDto {
     private String name;
     @NotBlank
     private String description;
+    private String previewPhotoUrl;
     @NotBlank
-    private String photosUrl;
+    private String contactPhone;
+    private String workingHours;
     @NotNull
     private AddressDto address;
 }

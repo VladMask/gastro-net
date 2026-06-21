@@ -37,10 +37,8 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>grsu.by</groupId>
-            <artifactId>user-rest-client</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
         </dependency>
     </dependencies>
 

@@ -20,6 +20,4 @@ public class RestaurantTableCreationDto {
     private String number;
     @Positive
     private Short capacity;
-    @NotBlank
-    private String location;
 }

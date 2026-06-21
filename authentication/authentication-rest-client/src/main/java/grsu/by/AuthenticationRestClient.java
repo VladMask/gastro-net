@@ -1,22 +1,26 @@
 package grsu.by;
 
 import grsu.by.config.properties.AuthenticationRestClientProperties;
-import grsu.by.dto.AuthenticationResponse;
-import grsu.by.dto.AuthenticationRequest;
-import grsu.by.dto.RefreshTokensRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.util.Objects;
 
 @Getter
 @Setter
 public class AuthenticationRestClient {
+
     private final AuthenticationRestClientProperties restClientProperties;
     private final RestClient restClient;
 
-    public AuthenticationRestClient(AuthenticationRestClientProperties restClientProperties, RestClient.Builder restClientBuilder) {
+    public AuthenticationRestClient(AuthenticationRestClientProperties restClientProperties,
+                                    RestClient.Builder restClientBuilder) {
         this.restClientProperties = restClientProperties;
         this.restClient = restClientBuilder
                 .baseUrl(restClientProperties.getBaseUrl())
@@ -24,39 +28,36 @@ public class AuthenticationRestClient {
                 .build();
     }
 
-    public AuthenticationResponse login(AuthenticationRequest request) {
-        return restClient
-                .post()
-                .uri("/api/v1/profiles/login")
-                .body(request)
-                .retrieve()
-                .body(AuthenticationResponse.class);
+    public void assignRole(Long profileId, String roleName) {
+        HttpServletRequest incoming = getIncomingRequest();
+        restClient.post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/api/v1/authentication/internal/profiles/{profileId}/roles")
+                .queryParam("roleName", roleName)
+                .build(profileId))
+            .header("X-Auth-Login", incoming.getHeader("X-Auth-Login"))
+            .header("X-Auth-Profile-Id", incoming.getHeader("X-Auth-Profile-Id"))
+            .header("X-Auth-Roles", incoming.getHeader("X-Auth-Roles"))
+            .retrieve()
+            .toBodilessEntity();
     }
 
-    public AuthenticationResponse register(AuthenticationRequest request) {
-        return restClient
-                .post()
-                .uri("/api/v1/profiles/register")
-                .body(request)
-                .retrieve()
-                .body(AuthenticationResponse.class);
+    public void setLocked(Long profileId, boolean locked) {
+        HttpServletRequest incoming = getIncomingRequest();
+        restClient.patch()
+            .uri(uriBuilder -> uriBuilder
+                .path("/api/v1/authentication/internal/profiles/{profileId}/lock")
+                .queryParam("locked", locked)
+                .build(profileId))
+            .header("X-Auth-Login", incoming.getHeader("X-Auth-Login"))
+            .header("X-Auth-Profile-Id", incoming.getHeader("X-Auth-Profile-Id"))
+            .header("X-Auth-Roles", incoming.getHeader("X-Auth-Roles"))
+            .retrieve()
+            .toBodilessEntity();
     }
 
-    public AuthenticationResponse refreshTokens(RefreshTokensRequest refreshTokensRequest) {
-        return  restClient
-                .post()
-                .uri("/api/v1/profiles/refresh")
-                .body(refreshTokensRequest)
-                .retrieve()
-                .body(AuthenticationResponse.class);
-    }
-
-    public String logout(RefreshTokensRequest refreshTokensRequest) {
-        return restClient
-                .post()
-                .uri("/api/v1/profiles/logout")
-                .body(refreshTokensRequest)
-                .retrieve()
-                .body(String.class);
+    private HttpServletRequest getIncomingRequest() {
+        return ((ServletRequestAttributes) Objects.requireNonNull(
+            RequestContextHolder.getRequestAttributes())).getRequest();
     }
 }

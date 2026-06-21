@@ -1,11 +1,8 @@
 package grsu.by;
 
-import grsu.by.config.properties.PaymentServiceProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
-@EnableConfigurationProperties(PaymentServiceProperties.class)
 @SpringBootApplication
 public class PaymentServiceApplication {
     public static void main(String[] args) {

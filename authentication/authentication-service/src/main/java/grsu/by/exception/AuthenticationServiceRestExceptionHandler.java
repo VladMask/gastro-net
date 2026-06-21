@@ -5,6 +5,7 @@ import grsu.by.dto.ExceptionMessageDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -31,7 +32,7 @@ public class AuthenticationServiceRestExceptionHandler {
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
-    public ExceptionMessageDto handleIllegalStateException(MethodArgumentNotValidException exception) {
+    public ExceptionMessageDto handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
         return exceptionDtoFactory.build(HttpStatus.NOT_ACCEPTABLE, exception);
     }
 
@@ -39,5 +40,11 @@ public class AuthenticationServiceRestExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public ExceptionMessageDto handleIllegalStateException(IllegalStateException exception) {
         return exceptionDtoFactory.build(HttpStatus.NOT_ACCEPTABLE, exception);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ExceptionMessageDto handleAccessDeniedException(AccessDeniedException exception) {
+        return exceptionDtoFactory.build(HttpStatus.FORBIDDEN, exception);
     }
 }

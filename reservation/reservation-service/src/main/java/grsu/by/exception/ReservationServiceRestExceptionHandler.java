@@ -15,16 +15,21 @@ public class ReservationServiceRestExceptionHandler {
 
     private final ExceptionDtoFactory exceptionDtoFactory;
 
-    @ExceptionHandler({EntityNotFoundException.class})
+    @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ExceptionMessageDto handleEntityNotFoundException(EntityNotFoundException exception) {
         return exceptionDtoFactory.build(HttpStatus.NOT_FOUND, exception);
     }
 
-    @ExceptionHandler({IllegalArgumentException.class})
+    @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionMessageDto handleEntityNotFoundException(IllegalArgumentException exception) {
+    public ExceptionMessageDto handleIllegalArgumentException(IllegalArgumentException exception) {
         return exceptionDtoFactory.build(HttpStatus.BAD_REQUEST, exception);
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ExceptionMessageDto handleIllegalStateException(IllegalStateException exception) {
+        return exceptionDtoFactory.build(HttpStatus.CONFLICT, exception);
+    }
 }

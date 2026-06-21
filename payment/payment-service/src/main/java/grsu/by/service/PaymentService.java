@@ -1,11 +1,12 @@
 package grsu.by.service;
 
-import grsu.by.dto.paymentDto.PaymentInvoiceDto;
 import grsu.by.dto.paymentDto.PaymentShortDto;
-import grsu.by.entity.Payment;
+import grsu.by.dto.paymentDto.StripeSessionDto;
 
 public interface PaymentService {
-    PaymentShortDto savePayment(Payment payment);
+    PaymentShortDto createPayment(Long orderId);
+    StripeSessionDto createStripeSession(Long paymentId);
     boolean confirmPayment(Long id);
-    PaymentInvoiceDto getInvoiceDataById(Long id);
+    boolean cancelPayment(Long id);
+    boolean handleStripeWebhook(String payload, String sigHeader);
 }

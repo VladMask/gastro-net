@@ -1,14 +1,12 @@
 package grsu.by.service.impl;
 
-import grsu.by.dto.RefreshTokensRequest;
+import grsu.by.config.properties.AuthenticationServiceProperties;
 import grsu.by.entity.Profile;
 import grsu.by.entity.RefreshToken;
 import grsu.by.repository.ProfileRepository;
 import grsu.by.repository.RefreshTokenRepository;
 import grsu.by.service.RefreshTokenService;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,12 +15,19 @@ import java.util.Date;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class RefreshTokenServiceImpl implements RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final ProfileRepository profileRepository;
-    @Value("${jwt.refresh-token.expiration-time}")
-    private Long REFRESH_TOKEN_EXPIRATION_TIME;
+    private final Long REFRESH_TOKEN_EXPIRATION_TIME;
+
+    public RefreshTokenServiceImpl(
+            RefreshTokenRepository refreshTokenRepository,
+            ProfileRepository profileRepository,
+            AuthenticationServiceProperties properties) {
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.profileRepository = profileRepository;
+        this.REFRESH_TOKEN_EXPIRATION_TIME = properties.getRefreshTokenService().getRefreshTokenExpirationTime();
+    }
 
     @Transactional
     @Override
@@ -41,8 +46,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Transactional
     @Override
-    public RefreshToken refreshToken(RefreshTokensRequest refreshTokenRequest) {
-        RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenRequest.getRefreshToken()).orElseThrow(
+    public RefreshToken refreshToken(String tokenToRefresh) {
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(tokenToRefresh).orElseThrow(
                 () -> new EntityNotFoundException("Token not found")
         );
         if (refreshToken.getExpirationDate().isBefore(Instant.now())) {
@@ -58,8 +63,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Transactional
     @Override
-    public void deleteByToken(RefreshTokensRequest refreshTokenRequest) {
-        refreshTokenRepository.deleteByToken(refreshTokenRequest.getRefreshToken());
+    public void deleteByToken(String refreshToken) {
+        refreshTokenRepository.deleteByToken(refreshToken);
     }
 
     @Transactional

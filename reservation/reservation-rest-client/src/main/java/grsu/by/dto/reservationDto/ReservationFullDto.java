@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReservationFullDto {
+    private Long id;
     private Long userId;
     private Long restaurantId;
     private Instant reservedAt;

@@ -2,10 +2,10 @@
 
 create table profiles (
     id bigserial primary key,
-    user_id bigint not null,
-    password_hash varchar(256) not null,
-    created_at timestamp with time zone not null,
-    updated_at timestamp with time zone not null
+    email varchar(255) not null unique,
+    password_hash varchar(255) not null,
+    created_at timestamp not null,
+    updated_at timestamp not null
 );
 
 --rollback drop table profiles;

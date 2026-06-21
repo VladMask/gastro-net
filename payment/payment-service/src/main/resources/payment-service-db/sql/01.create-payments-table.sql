@@ -8,7 +8,9 @@ create table payments (
      amount decimal(14,2) not null,
      payment_method varchar not null,
      status varchar not null,
-     created_at timestamp with time zone not null
+     created_at timestamp not null,
+     alfabank_order_id varchar(64),
+     payment_form_url  varchar(512)
 );
 
 --rollback drop table payments;

@@ -39,6 +39,9 @@ public class Profile {
     private String email;
     @Column(name = "password_hash")
     private String passwordHash;
+    @Column(name = "locked")
+    @Builder.Default
+    private boolean locked = false;
     @Column(name = "created_at")
     @CreationTimestamp
     private Instant createdAt;
@@ -52,7 +55,7 @@ public class Profile {
             joinColumns = {@JoinColumn(name = "profile_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")}
     )
-    private List<Role> roles;
+    private List<Role> roles = new java.util.ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id")

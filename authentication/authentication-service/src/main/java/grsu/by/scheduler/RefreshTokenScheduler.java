@@ -18,16 +18,4 @@ public class RefreshTokenScheduler {
         service.deleteExpiredTokens();
     }
 
-    @Scheduled(fixedDelayString = "${scheduler.fixedDelay}")
-    public void deleteExpiredTokensOnStartup() {
-        log.info("Delete expired refresh tokens using fixed delay");
-        service.deleteExpiredTokens();
-    }
-
-    @Scheduled(fixedRateString = "${scheduler.fixedRate}")
-    public void deleteExpiredTokensRate() {
-        log.info("Delete expired refresh tokens using fixedRate");
-        service.deleteExpiredTokens();
-    }
-
 }

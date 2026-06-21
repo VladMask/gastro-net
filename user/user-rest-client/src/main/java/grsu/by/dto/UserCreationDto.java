@@ -23,8 +23,7 @@ public class UserCreationDto {
     private String lastname;
     @Email
     private String email;
-    @NotBlank
-    private String password;
+    private String phoneNumber;
     @Past
     private LocalDate birthDate;
 }

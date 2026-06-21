@@ -1,0 +1,52 @@
+server:
+  port: ${AUTH_SERVICE_PORT:8082}
+
+spring:
+  application:
+    name: authentication-service
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  liquibase:
+    change-log: classpath:authentication-service-db/changelog.xml
+
+exception:
+  dto-factory:
+    serviceId: authentication-service
+
+logging:
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+management:
+  tracing:
+    sampling:
+      probability: 1
+
+scheduler:
+  cron:
+    interval: "0 0/10 * * * *"
+
+authentication:
+  jwt-generator:
+    secret: ${JWT_SECRET}
+    access-token-expiration-time: ${JWT_ACCESS_TOKEN_EXPIRATION:600000}
+  refresh-token-service:
+    refresh-token-expiration-time: ${JWT_REFRESH_TOKEN_EXPIRATION:86400000}
+  cookie:
+    secure: ${COOKIE_SECURE:false}
+
+rest:
+  client:
+    user-service:
+      base-url: ${USER_SERVICE_URL:http://localhost:8081}

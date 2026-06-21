@@ -1,0 +1,56 @@
+﻿server:
+  port: ${RESERVATION_SERVICE_PORT:8084}
+
+spring:
+  application:
+    name: reservation-service
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  liquibase:
+    change-log: classpath:reservation-service-db/changelog.xml
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+rest:
+  client:
+    restaurant-service:
+      base-url: ${RESTAURANT_SERVICE_URL}
+
+common:
+  outbox:
+    producer:
+      kafka-topic: reservations
+    scheduler:
+      lock-at-most-for: 2m
+      initial-delay: 10000
+      fixed-delay: 5000
+      enabled: true
+
+exception:
+  dto-factory:
+    service-id: reservation-service
+
+logging:
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+management:
+  tracing:
+    sampling:
+      probability: 1
+
+reservation:
+  scheduler:
+    expiration-check-delay: 300000
+    expiration-initial-delay: 60000

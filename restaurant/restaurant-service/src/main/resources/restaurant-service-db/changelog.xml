@@ -5,40 +5,32 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-    <changeSet id="01.create-addresses" author="Vladislav Maskevich">
-        <sqlFile encoding="utf8" path="sql/01.create-addresses-table.sql" relativeToChangelogFile="true"/>
+    <changeSet id="01.create-restaurants-table" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/01.create-restaurants-table.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
-    <changeSet id="02.create-restaurants" author="Vladislav Maskevich">
-        <sqlFile encoding="utf8" path="sql/02.create-restaurants-table.sql" relativeToChangelogFile="true"/>
+    <changeSet id="02.create-meal-categories-table" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/02.create-meal-categories-table.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
-    <changeSet id="03.create-restaurants_copy" author="Vladislav Maskevich">
-        <sqlFile encoding="utf8" path="sql/03.create-restaurants_copy-table.sql" relativeToChangelogFile="true"/>
+    <changeSet id="03.create-meals-table" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/03.create-meals-table.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
-    <changeSet id="04.insert-data-to-restaurants_copy" author="Vladislav Maskevich">
-        <sqlFile encoding="utf8" path="sql/04.insert-data-to-restaurants_copy-table.sql" relativeToChangelogFile="true"/>
+    <changeSet id="04.create-reviews-table" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/04.create-reviews-table.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
-    <changeSet id="05.drop-restaurants" author="Vladislav Maskevich">
-        <sqlFile encoding="utf8" path="sql/05.drop-restaurants-table.sql" relativeToChangelogFile="true"/>
+    <changeSet id="05.create-restaurant_admins-table" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/05.create-restaurant_admins-table.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
-    <changeSet id="06.drop-addresses" author="Vladislav Maskevich">
-        <sqlFile encoding="utf8" path="sql/06.drop-addresses-table.sql" relativeToChangelogFile="true"/>
+    <changeSet id="06.add-status-column-to-restaurants-table" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/06.add-status-column-to-restaurants-table.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
-    <changeSet id="07.rename-restaurants_copy-to-restaurants" author="Vladislav Maskevich">
-        <sqlFile encoding="utf8" path="sql/07.rename-restaurants_copy-table-to-restaurants.sql" relativeToChangelogFile="true"/>
-    </changeSet>
-
-    <changeSet id="08.create-meal-categories" author="Vladislav Maskevich">
-        <sqlFile encoding="utf8" path="sql/08.create-meal-categories-table.sql" relativeToChangelogFile="true"/>
-    </changeSet>
-
-    <changeSet id="09.create-meals" author="Vladislav Maskevich">
-        <sqlFile encoding="utf8" path="sql/09.create-meals-table.sql" relativeToChangelogFile="true"/>
+    <changeSet id="07.add-owner_email-column-to-restaurants-table" author="Vladislav Maskevich">
+        <sqlFile encoding="utf8" path="sql/07.add-owner_email-column-to-restaurants-table.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
 </databaseChangeLog>

@@ -17,6 +17,6 @@ public class OutboxEventScheduler {
     )
     @SchedulerLock(name = "sendEventsToKafka")
     public void sendEventsToKafka() {
-        outboxEventProducer.sendUserCreatedEvents();
+        outboxEventProducer.sendCreatedEvents();
     }
 }

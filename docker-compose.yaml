@@ -1,0 +1,328 @@
+services:
+
+  # ─────────────────────────────────────────
+  # Infrastructure
+  # ─────────────────────────────────────────
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - api-gateway
+
+  kafka:
+    image: apache/kafka:4.1.0
+    restart: unless-stopped
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z-cpuv1
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    ports:
+      - "9001:9001"
+      - "9000:9000"
+    volumes:
+      - gn-minio_data:/data
+
+  # ─────────────────────────────────────────
+  # Backend Services
+  # ─────────────────────────────────────────
+
+  api-gateway:
+    build: ./api-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      GATEWAY_PORT: ${GATEWAY_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+      USER_SERVICE_URL: ${USER_SERVICE_URL}
+      RESTAURANT_SERVICE_URL: ${RESTAURANT_SERVICE_URL}
+      RESERVATION_SERVICE_URL: ${RESERVATION_SERVICE_URL}
+      ORDER_SERVICE_URL: ${ORDER_SERVICE_URL}
+      PAYMENT_SERVICE_URL: ${PAYMENT_SERVICE_URL}
+      NOTIFICATION_SERVICE_URL: ${NOTIFICATION_SERVICE_URL}
+    depends_on:
+      - authentication-service
+      - user-service
+      - restaurant-service
+      - order-service
+      - payment-service
+      - reservation-service
+      - notification-service
+
+  authentication-service:
+    build: ./authentication/authentication-service
+    restart: unless-stopped
+    environment:
+      AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
+      DB_URL: jdbc:postgresql://authentication-db:5432/${AUTHENTICATION_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION}
+      JWT_REFRESH_TOKEN_EXPIRATION: ${JWT_REFRESH_TOKEN_EXPIRATION}
+      COOKIE_SECURE: ${COOKIE_SECURE}
+      USER_SERVICE_URL: ${USER_SERVICE_URL}
+    depends_on:
+      authentication-db:
+        condition: service_healthy
+
+  authentication-db:
+    image: postgres:16-alpine3.20
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${AUTHENTICATION_DB}
+    volumes:
+      - gn-authentication-service_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${AUTHENTICATION_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  user-service:
+    build: ./user/user-service
+    restart: unless-stopped
+    environment:
+      USER_SERVICE_PORT: ${USER_SERVICE_PORT}
+      DB_URL: jdbc:postgresql://user-db:5432/${USER_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+    depends_on:
+      user-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  user-db:
+    image: postgres:16-alpine3.20
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${USER_DB}
+    volumes:
+      - gn-user-service_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${USER_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  restaurant-service:
+    build: ./restaurant/restaurant-service
+    restart: unless-stopped
+    environment:
+      RESTAURANT_SERVICE_PORT: ${RESTAURANT_SERVICE_PORT}
+      DB_URL: jdbc:postgresql://restaurant-db:5432/${RESTAURANT_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT}
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+    depends_on:
+      restaurant-db:
+        condition: service_healthy
+      minio:
+        condition: service_started
+
+  restaurant-db:
+    image: postgres:16-alpine3.20
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${RESTAURANT_DB}
+    volumes:
+      - gn-restaurant-service_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${RESTAURANT_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  order-service:
+    build: ./order/order-service
+    restart: unless-stopped
+    environment:
+      ORDER_SERVICE_PORT: ${ORDER_SERVICE_PORT}
+      DB_URL: jdbc:postgresql://order-db:5432/${ORDER_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      RESTAURANT_SERVICE_URL: ${RESTAURANT_SERVICE_URL}
+    depends_on:
+      order-db:
+        condition: service_healthy
+
+  order-db:
+    image: postgres:16-alpine3.20
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${ORDER_DB}
+    volumes:
+      - gn-order-service_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${ORDER_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  payment-service:
+    build: ./payment/payment-service
+    restart: unless-stopped
+    environment:
+      PAYMENT_SERVICE_PORT: ${PAYMENT_SERVICE_PORT}
+      DB_URL: jdbc:postgresql://payment-db:5432/${PAYMENT_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      ORDER_SERVICE_URL: ${ORDER_SERVICE_URL}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+    depends_on:
+      payment-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  payment-db:
+    image: postgres:16-alpine3.20
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${PAYMENT_DB}
+    volumes:
+      - gn-payment-service_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${PAYMENT_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  reservation-service:
+    build: ./reservation/reservation-service
+    restart: unless-stopped
+    environment:
+      RESERVATION_SERVICE_PORT: ${RESERVATION_SERVICE_PORT}
+      DB_URL: jdbc:postgresql://reservation-db:5432/${RESERVATION_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      RESTAURANT_SERVICE_URL: ${RESTAURANT_SERVICE_URL}
+    depends_on:
+      reservation-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  reservation-db:
+    image: postgres:16-alpine3.20
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${RESERVATION_DB}
+    volumes:
+      - gn-reservation-service_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${RESERVATION_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  notification-service:
+    build: ./notification/notification-service
+    restart: unless-stopped
+    environment:
+      NOTIFICATION_SERVICE_PORT: ${NOTIFICATION_SERVICE_PORT}
+      DB_URL: jdbc:postgresql://notification-db:5432/${NOTIFICATION_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      USER_SERVICE_URL: ${USER_SERVICE_URL}
+    depends_on:
+      notification-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  notification-db:
+    image: postgres:16-alpine3.20
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${NOTIFICATION_DB}
+    volumes:
+      - gn-notification-service_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${NOTIFICATION_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────
+  # Frontend
+  # ─────────────────────────────────────────
+
+  frontend:
+    build:
+      context: D:/Projects/gastro-net-frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+
+# ─────────────────────────────────────────
+# Volumes — существующие (external)
+# ─────────────────────────────────────────
+
+volumes:
+  gn-authentication-service_pg_data:
+    external: true
+  gn-minio_data:
+    external: true
+  gn-notification-service_pg_data:
+    external: true
+  gn-order-service_pg_data:
+    external: true
+  gn-payment-service_pg_data:
+    external: true
+  gn-reservation-service_pg_data:
+    external: true
+  gn-restaurant-service_pg_data:
+    external: true
+  gn-user-service_pg_data:
+    external: true

@@ -46,6 +46,8 @@ public class Meal {
     private Short carbs;
     @Column(name = "calories")
     private Short calories;
+    @Column(name = "ingredients", columnDefinition = "text")
+    private String ingredients;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")

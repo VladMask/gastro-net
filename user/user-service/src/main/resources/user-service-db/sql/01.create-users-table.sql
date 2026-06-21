@@ -2,13 +2,13 @@
 
 create table users (
     id bigserial primary key,
-    firstname varchar(20) not null,
-    lastname varchar(20) not null,
-    email varchar(60) not null unique,
-    birth_date timestamp with time zone not null,
-    password varchar(256) not null,
-    created_at timestamp with time zone not null,
-    updated_at timestamp with time zone not null
+    firstname varchar(100) not null,
+    lastname varchar(100) not null,
+    email varchar(255) not null unique,
+    phone_number varchar(32) not null,
+    birth_date date not null,
+    created_at timestamp not null,
+    updated_at timestamp not null
 );
 
 --rollback drop table users;

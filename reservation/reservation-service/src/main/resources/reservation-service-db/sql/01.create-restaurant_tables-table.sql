@@ -5,7 +5,6 @@ create table restaurant_tables (
      restaurant_id bigint not null,
      number varchar not null,
      capacity smallint not null default 1,
-     location varchar not null,
      status varchar not null
 );
 

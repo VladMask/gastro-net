@@ -1,10 +1,7 @@
 package grsu.by.entity;
 
-import grsu.by.enums.RestaurantTableStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,20 +21,19 @@ import org.hibernate.annotations.ColumnDefault;
 @Entity
 @Table(name = "restaurant_tables")
 public class RestaurantTable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
     @Column(name = "restaurant_id")
     private Long restaurantId;
+
     @Column(name = "number")
     private String number;
+
     @Column(name = "capacity")
     @ColumnDefault("1")
     private Short capacity;
-    @Column(name = "location")
-    private String location;
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    private RestaurantTableStatus status;
 }

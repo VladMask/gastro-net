@@ -1,13 +1,12 @@
 package grsu.by.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import grsu.by.dto.EmailResponse;
 import grsu.by.dto.UserCreationDto;
+import grsu.by.dto.UserFullDto;
 import grsu.by.dto.UserShortDto;
-import grsu.by.entity.OutboxEvent;
+import grsu.by.dto.UserUpdateDto;
 import grsu.by.entity.User;
 import grsu.by.repository.UserRepository;
-import grsu.by.service.OutboxEventService;
 import grsu.by.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
     private final ModelMapper mapper;
     private final UserRepository userRepository;
-    private final OutboxEventService outboxEventService;
-    private final ObjectMapper objectMapper;
 
     @SneakyThrows
     @Transactional
@@ -36,10 +33,6 @@ public class UserServiceImpl implements UserService {
         catch (DataIntegrityViolationException exception) {
             throw new IllegalStateException("User with specified email already exists");
         }
-        outboxEventService.create(new OutboxEvent(
-                "User created",
-                objectMapper.writeValueAsString(user))
-        );
         return user.getId();
     }
 
@@ -58,6 +51,25 @@ public class UserServiceImpl implements UserService {
                 () -> new EntityNotFoundException("User not found")
         );
         return new EmailResponse(email);
+    }
+
+    @Override
+    public UserFullDto findByEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new EntityNotFoundException("User not found")
+        );
+        return mapper.map(user, UserFullDto.class);
+    }
+
+    @Transactional
+    public UserFullDto updateMe(String email, UserUpdateDto dto) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        if (dto.getFirstname() != null) user.setFirstname(dto.getFirstname());
+        if (dto.getLastname() != null) user.setLastname(dto.getLastname());
+        if (dto.getPhoneNumber() != null) user.setPhoneNumber(dto.getPhoneNumber());
+        if (dto.getBirthDate() != null) user.setBirthDate(dto.getBirthDate());
+        return mapper.map(userRepository.save(user), UserFullDto.class);
     }
 
 }

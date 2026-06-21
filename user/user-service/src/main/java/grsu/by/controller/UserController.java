@@ -2,16 +2,22 @@ package grsu.by.controller;
 
 import grsu.by.dto.EmailResponse;
 import grsu.by.dto.UserCreationDto;
+import grsu.by.dto.UserFullDto;
 import grsu.by.dto.UserShortDto;
+import grsu.by.dto.UserUpdateDto;
 import grsu.by.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,6 +35,13 @@ public class UserController {
         return service.create(creationDto);
     }
 
+    @GetMapping("/email")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
+    public UserFullDto findByEmail(@RequestParam String email) {
+        return service.findByEmail(email);
+    }
+
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public UserShortDto findById(@PathVariable Long id) {
@@ -36,11 +49,27 @@ public class UserController {
         return service.findById(id);
     }
 
+    @GetMapping("/me")
+    @ResponseStatus(HttpStatus.OK)
+    public UserFullDto findMe(@RequestParam String email) {
+        log.info("Find me by email {}", email);
+        return service.findByEmail(email);
+    }
+
     @GetMapping("/email/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public EmailResponse findUserEmail(@PathVariable Long userId) {
         log.info("Find User email by userId {}", userId);
         return service.findUserEmail(userId);
+    }
+
+    @PutMapping("/me")
+    @ResponseStatus(HttpStatus.OK)
+    public UserFullDto updateMe(
+            @RequestHeader("X-Auth-Login") String email,
+            @RequestBody UserUpdateDto dto) {
+        log.info("Update profile for {}", email);
+        return service.updateMe(email, dto);
     }
 
 }

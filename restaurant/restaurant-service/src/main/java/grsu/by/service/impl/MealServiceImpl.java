@@ -1,26 +1,131 @@
 package grsu.by.service.impl;
 
-import grsu.by.dto.mealDto.MealInvoiceInfo;
+import grsu.by.dto.mealDto.MealCreationDto;
+import grsu.by.dto.mealDto.MealFullDto;
 import grsu.by.entity.Meal;
+import grsu.by.entity.MealCategory;
+import grsu.by.entity.Restaurant;
+import grsu.by.repository.MealCategoryRepository;
 import grsu.by.repository.MealRepository;
+import grsu.by.repository.RestaurantRepository;
+import grsu.by.security.RestaurantSecurity;
 import grsu.by.service.MealService;
+import grsu.by.service.StorageService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
 public class MealServiceImpl implements MealService {
-    private final MealRepository repository;
+
+    private final MealRepository mealRepository;
+    private final MealCategoryRepository mealCategoryRepository;
+    private final RestaurantRepository restaurantRepository;
     private final ModelMapper mapper;
+    private final RestaurantSecurity restaurantSecurity;
+    private final StorageService storageService;
+
+    @Transactional
+    @Override
+    public MealFullDto create(MealCreationDto creationDto, MultipartFile photo) {
+        Meal meal = mapper.map(creationDto, Meal.class);
+        MealCategory category = mealCategoryRepository.findById(creationDto.getCategoryId())
+                .orElseThrow(() -> new EntityNotFoundException("MealCategory not found"));
+        meal.setCategory(category);
+        Restaurant restaurant = restaurantRepository.findById(creationDto.getRestaurantId())
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found"));
+        meal.setRestaurant(restaurant);
+        meal = mealRepository.save(meal);
+        if (photo != null) {
+            String url = storageService.upload("meals/" + meal.getId(), photo);
+            meal.setPhotoUrl(url);
+            mealRepository.save(meal);
+        }
+        return toDto(meal);
+    }
 
     @Override
-    public List<MealInvoiceInfo> findByIds(List<Long> ids) {
-        List<Meal> meals = repository.findAllById(ids);
-        return meals.stream()
-                .map(meal -> mapper.map(meal, MealInvoiceInfo.class))
-                .toList();
+    public MealFullDto findById(Long id) {
+        return toDto(mealRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Meal not found")));
+    }
+
+    @Override
+    public Page<MealFullDto> findByRestaurantId(Long restaurantId, Pageable pageable) {
+        return mealRepository.findByRestaurantId(restaurantId, pageable)
+                .map(this::toDto);
+    }
+
+    @Transactional
+    @Override
+    public MealFullDto update(Long id, MealCreationDto updateDto) {
+        Meal meal = mealRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Meal not found"));
+        checkAdminOf(meal.getRestaurant().getId());
+        String existingPhotoUrl = meal.getPhotoUrl();
+        mapper.map(updateDto, meal);
+        meal.setPhotoUrl(existingPhotoUrl);
+        meal.setCategory(new MealCategory());
+        meal.getCategory().setId(updateDto.getCategoryId());
+        meal.setRestaurant(new Restaurant());
+        meal.getRestaurant().setId(updateDto.getRestaurantId());
+        return toDto(mealRepository.save(meal));
+    }
+
+    @Transactional
+    @Override
+    public void delete(Long id) {
+        Meal meal = mealRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Meal not found"));
+        checkAdminOf(meal.getRestaurant().getId());
+        mealRepository.deleteById(id);
+    }
+
+    @Transactional
+    @Override
+    public String uploadPhoto(Long mealId, MultipartFile file) {
+        Meal meal = mealRepository.findById(mealId)
+                .orElseThrow(() -> new EntityNotFoundException("Meal not found"));
+        checkAdminOf(meal.getRestaurant().getId());
+        if (meal.getPhotoUrl() != null) {
+            storageService.delete(meal.getPhotoUrl());
+        }
+        String url = storageService.upload("meals/" + mealId, file);
+        meal.setPhotoUrl(url);
+        mealRepository.save(meal);
+        return url;
+    }
+
+    @Transactional
+    @Override
+    public void deletePhoto(Long mealId) {
+        Meal meal = mealRepository.findById(mealId)
+                .orElseThrow(() -> new EntityNotFoundException("Meal not found"));
+        checkAdminOf(meal.getRestaurant().getId());
+        if (meal.getPhotoUrl() != null) {
+            storageService.delete(meal.getPhotoUrl());
+            meal.setPhotoUrl(null);
+            mealRepository.save(meal);
+        }
+    }
+
+    private MealFullDto toDto(Meal meal) {
+        MealFullDto dto = mapper.map(meal, MealFullDto.class);
+        if (meal.getCategory() != null) dto.setCategoryId(meal.getCategory().getId());
+        if (meal.getRestaurant() != null) dto.setRestaurantId(meal.getRestaurant().getId());
+        return dto;
+    }
+
+    public void checkAdminOf(Long restaurantId) {
+        if (!restaurantSecurity.isAdminOf(restaurantId)) {
+            throw new AccessDeniedException("You are not an admin of this restaurant");
+        }
     }
 }

@@ -1,6 +1,5 @@
 package grsu.by.service.impl;
 
-import grsu.by.ReservationRestClient;
 import grsu.by.dto.orderDto.OrderCreationDto;
 import grsu.by.dto.orderDto.OrderFullDto;
 import grsu.by.dto.orderDto.OrderShortDto;
@@ -9,13 +8,16 @@ import grsu.by.entity.OrderMeal;
 import grsu.by.enums.OrderStatus;
 import grsu.by.repository.OrderMealRepository;
 import grsu.by.repository.OrderRepository;
+import grsu.by.security.OrderSecurity;
 import grsu.by.service.OrderService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -23,51 +25,67 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
+
     private final OrderRepository orderRepository;
     private final OrderMealRepository orderMealRepository;
     private final ModelMapper mapper;
-    private final ReservationRestClient reservationRestClient;
+    private final OrderSecurity orderSecurity;
 
     @Transactional
     @Override
     public OrderShortDto create(OrderCreationDto creationDto) {
-        try {
-            reservationRestClient.findReservationById(creationDto.getReservationId());
-        } catch (HttpClientErrorException e) {
-            throw new EntityNotFoundException("No active reservation was found");
-        }
-
         Order order = mapper.map(creationDto, Order.class);
         order.setStatus(OrderStatus.CREATED);
-
         List<OrderMeal> orderMeals = order.getOrderMeals();
         order.setTotalPrice(computeTotalPrice(orderMeals));
         order.setOrderMeals(null);
-
         Long orderId = orderRepository.save(order).getId();
-
         orderMeals.forEach(orderMeal -> orderMeal.setOrderId(orderId));
         orderMealRepository.saveAll(orderMeals);
-
+        order.setId(orderId);
         return mapper.map(order, OrderShortDto.class);
     }
 
     @Override
     public OrderShortDto findById(Long id) {
-        Order order = orderRepository.findWithDetailsById(id).orElseThrow(
-                () -> new EntityNotFoundException("Order not found")
-        );
-        order.setTotalPrice(computeTotalPrice(order.getOrderMeals()));
+        Order order = orderRepository.findWithDetailsById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
         return mapper.map(order, OrderShortDto.class);
     }
 
     @Override
     public OrderFullDto findByIdWithDetails(Long id) {
-        Order order = orderRepository.findWithDetailsById(id).orElseThrow(
-                () -> new EntityNotFoundException("Order not found")
-        );
-        order.setTotalPrice(computeTotalPrice(order.getOrderMeals()));
+        Order order = orderRepository.findWithDetailsById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
         return mapper.map(order, OrderFullDto.class);
+    }
+
+    @Override
+    public Page<OrderShortDto> findByUserId(Long userId, Pageable pageable) {
+        return orderRepository.findByUserId(userId, pageable)
+                .map(order -> mapper.map(order, OrderShortDto.class));
+    }
+
+    @Override
+    public Page<OrderShortDto> findByRestaurantId(Long restaurantId, Pageable pageable) {
+        return orderRepository.findByRestaurantId(restaurantId, pageable)
+                .map(order -> mapper.map(order, OrderShortDto.class));
+    }
+
+    @Transactional
+    @Override
+    public OrderShortDto updateStatus(Long id, OrderStatus status) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+        checkAdminOf(order.getRestaurantId());
+        order.setStatus(status);
+        return mapper.map(orderRepository.save(order), OrderShortDto.class);
+    }
+
+    private void checkAdminOf(Long restaurantId) {
+        if (!orderSecurity.isAdminOfRestaurant(restaurantId)) {
+            throw new AccessDeniedException("You are not an admin of this restaurant");
+        }
     }
 
     private BigDecimal computeTotalPrice(List<OrderMeal> meals) {

@@ -10,8 +10,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class NotificationServiceProperties {
     private Consumer consumer;
     private Scheduler scheduler;
-    private VerificationCode verificationCode;
-    private CodeHasher codeHasher;
 
     @Getter
     @Setter
@@ -26,17 +24,5 @@ public class NotificationServiceProperties {
         private int initialDelay;
         private boolean enabled;
         private String lockAtMostFor;
-    }
-
-    @Getter
-    @Setter
-    public static class VerificationCode {
-        private int expirationTimeSeconds;
-    }
-
-    @Getter
-    @Setter
-    public static class CodeHasher {
-        private String otpSecret;
     }
 }
