@@ -3,6 +3,7 @@ package grsu.by.service;
 import grsu.by.dto.reservationDto.AvailableSlotDto;
 import grsu.by.dto.reservationDto.ReservationCreationDto;
 import grsu.by.dto.reservationDto.ReservationFullDto;
+import grsu.by.enums.ReservationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -28,5 +29,7 @@ public interface ReservationService {
 
     List<AvailableSlotDto> getAvailableSlots(Long restaurantId, List<Long> tableIds, LocalDate date);
 
-    Page<ReservationFullDto> findByRestaurantIdWithFilters(Long restaurantId, Instant dateFrom, Instant dateTo, Pageable pageable);
+    Page<ReservationFullDto> findByRestaurantIdWithFilters(
+            Long restaurantId, ReservationStatus status,
+            Instant dateFrom, Instant dateTo, Pageable pageable);
 }

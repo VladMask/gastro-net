@@ -15,6 +15,7 @@ import grsu.by.repository.RestaurantTableRepository;
 import grsu.by.security.ReservationSecurity;
 import grsu.by.service.OutboxEventService;
 import grsu.by.service.ReservationService;
+import grsu.by.specification.ReservationSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -168,9 +169,11 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public Page<ReservationFullDto> findByRestaurantIdWithFilters(Long restaurantId, Instant dateFrom, Instant dateTo, Pageable pageable) {
-        return reservationRepository
-                .findByRestaurantIdWithFilters(restaurantId, dateFrom, dateTo, pageable)
+    public Page<ReservationFullDto> findByRestaurantIdWithFilters(
+            Long restaurantId, ReservationStatus status,
+            Instant dateFrom, Instant dateTo, Pageable pageable) {
+        var spec = ReservationSpecification.filter(restaurantId, status, dateFrom, dateTo);
+        return reservationRepository.findAll(spec, pageable)
                 .map(r -> mapper.map(r, ReservationFullDto.class));
     }
 

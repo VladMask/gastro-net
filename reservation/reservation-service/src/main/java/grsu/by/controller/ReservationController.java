@@ -3,6 +3,7 @@ package grsu.by.controller;
 import grsu.by.dto.reservationDto.AvailableSlotDto;
 import grsu.by.dto.reservationDto.ReservationCreationDto;
 import grsu.by.dto.reservationDto.ReservationFullDto;
+import grsu.by.enums.ReservationStatus;
 import grsu.by.service.ReservationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -83,13 +84,17 @@ public class ReservationController {
             @PathVariable Long restaurantId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "reservedAt") String sortBy,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo
     ) {
+        ReservationStatus statusEnum = status != null ? ReservationStatus.valueOf(status) : null;
         Instant from = dateFrom != null ? dateFrom.atStartOfDay(ZoneOffset.UTC).toInstant() : null;
         Instant to   = dateTo   != null ? dateTo.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant() : null;
-        Pageable pageable = PageRequest.of(page, size, Sort.by("reservedAt").descending());
-        return service.findByRestaurantIdWithFilters(restaurantId, from, to, pageable);
+        String sortField = sortBy.equals("createdAt") ? "createdAt" : "reservedAt";
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortField).descending());
+        return service.findByRestaurantIdWithFilters(restaurantId, statusEnum, from, to, pageable);
     }
 
     @GetMapping("/available-slots")

@@ -5,13 +5,15 @@ import grsu.by.enums.ReservationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
 import java.util.List;
 
-public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+public interface ReservationRepository extends JpaRepository<Reservation, Long>,
+        JpaSpecificationExecutor<Reservation> {
 
     @Query("""
         select count(r) > 0 from Reservation r
@@ -25,20 +27,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("tableIds") List<Long> tableIds,
             @Param("reservedAt") Instant reservedAt,
             @Param("reservedUntil") Instant reservedUntil
-    );
-
-    @Query("""
-        select r from Reservation r
-        where r.restaurantId = :restaurantId
-          and (:dateFrom is null or r.reservedAt >= :dateFrom)
-          and (:dateTo is null or r.reservedAt < :dateTo)
-        order by r.reservedAt desc
-    """)
-    Page<Reservation> findByRestaurantIdWithFilters(
-            @Param("restaurantId") Long restaurantId,
-            @Param("dateFrom") Instant dateFrom,
-            @Param("dateTo") Instant dateTo,
-            Pageable pageable
     );
 
     Page<Reservation> findByUserId(Long userId, Pageable pageable);
